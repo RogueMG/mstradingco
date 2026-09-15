@@ -1,5 +1,6 @@
 import { ArrowUpRight, Menu } from "lucide-react";
 import { motion } from "motion/react";
+import { Link } from "react-router";
 
 const navigation = [
   { label: "Home", href: "/" },
@@ -20,8 +21,8 @@ function Navbar() {
         className="mx-auto flex max-w-7xl items-center justify-between rounded-2xl border border-white/30 bg-white/95 px-4 py-3 shadow-lg backdrop-blur-md md:px-6"
       >
         {/* Logo */}
-        <a
-          href="/"
+        <Link
+          to="/"
           className="flex items-center gap-2"
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#063b73] text-sm font-bold text-white">
@@ -36,30 +37,30 @@ function Navbar() {
               Trading Co
             </div>
           </div>
-        </a>
+        </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden items-center gap-7 md:flex">
           {navigation.map((item) => (
-            <a
+            <Link
               key={item.label}
-              href={item.href}
+              to={item.href}
               className="text-sm font-medium text-slate-700 transition-colors hover:text-[#f4511e]"
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </div>
 
         {/* CTA */}
         <div className="flex items-center gap-3">
-          <a
-            href="/contact"
+          <Link
+            to="/contact"
             className="hidden items-center gap-2 rounded-full bg-[#f4511e] px-5 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.03] md:flex"
           >
             Get a Quote
             <ArrowUpRight size={16} />
-          </a>
+          </Link>
 
           <button
             className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-[#063b73] md:hidden"

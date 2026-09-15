@@ -1,5 +1,6 @@
 import { ArrowDown, ArrowUpRight, Phone } from "lucide-react";
 import { motion } from "motion/react";
+import { Link } from "react-router";
 
 function Hero() {
   return (
@@ -64,8 +65,8 @@ function Hero() {
             transition={{ delay: 0.75, duration: 0.7 }}
             className="mt-9 flex flex-wrap gap-4"
           >
-            <a
-              href="/products"
+            <Link
+              to="/products"
               className="group flex items-center gap-3 rounded-full bg-[#f4511e] px-6 py-3.5 text-sm font-bold text-white transition-all hover:gap-5 hover:bg-[#e44718]"
             >
               Explore Products
@@ -73,7 +74,7 @@ function Hero() {
                 size={18}
                 className="transition-transform group-hover:rotate-45"
               />
-            </a>
+            </Link>
 
             <a
               href="tel:+918939575200"

@@ -1,7 +1,10 @@
 import { ArrowUpRight, CheckCircle2, Clock3 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
+import { Link } from "react-router";
 
 import { brands } from "../../data/brands";
+
+const MotionLink = motion.create(Link);
 
 function BrandsPreview() {
   const shouldReduceMotion = useReducedMotion();
@@ -46,8 +49,8 @@ function BrandsPreview() {
             </motion.h2>
           </div>
 
-          <motion.a
-            href="/brands"
+          <MotionLink
+            to="/brands"
             initial={shouldReduceMotion ? false : { opacity: 0, y: 15 }}
             whileInView={
               shouldReduceMotion ? undefined : { opacity: 1, y: 0 }
@@ -64,7 +67,7 @@ function BrandsPreview() {
                 className="transition-transform duration-300 group-hover:rotate-45"
               />
             </span>
-          </motion.a>
+          </MotionLink>
         </div>
 
         {/* Intro */}
@@ -219,8 +222,8 @@ function BrandsPreview() {
             </p>
           </div>
 
-          <a
-            href="/contact"
+          <Link
+            to="/contact"
             className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#f4511e] px-6 py-3.5 text-sm font-bold text-white transition-all hover:bg-[#e44718] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40"
           >
             Request a Quote
@@ -229,7 +232,7 @@ function BrandsPreview() {
               size={17}
               className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
             />
-          </a>
+          </Link>
         </motion.div>
       </div>
     </section>

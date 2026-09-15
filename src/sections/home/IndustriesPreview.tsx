@@ -5,6 +5,7 @@ import {
   useReducedMotion,
 } from "motion/react";
 import { useState } from "react";
+import { Link } from "react-router";
 
 import { industries } from "../../data/industries";
 
@@ -213,8 +214,8 @@ function IndustriesPreview() {
             </div>
 
             <div className="border-t border-white/10 p-6 md:p-8">
-              <a
-                href="/contact"
+              <Link
+                to="/contact"
                 className="group flex items-center justify-between rounded-2xl border border-white/15 bg-white/5 p-5 transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f4511e]/40"
               >
                 <div>
@@ -233,7 +234,7 @@ function IndustriesPreview() {
                     className="transition-transform duration-300 group-hover:rotate-45"
                   />
                 </span>
-              </a>
+              </Link>
             </div>
           </div>
         </div>

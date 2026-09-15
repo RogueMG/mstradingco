@@ -1,7 +1,10 @@
 import { ArrowUpRight } from "lucide-react";
 import { motion, type Variants } from "motion/react";
+import { Link } from "react-router";
 
 import { productCategories } from "../../data/products";
+
+const MotionLink = motion.create(Link);
 
 const containerVariants: Variants = {
   hidden: {},
@@ -77,8 +80,8 @@ function ProductCategories() {
               explore products sourced from established industrial brands.
             </p>
 
-            <a
-              href="/products"
+            <Link
+              to="/products"
               className="group mt-5 inline-flex items-center gap-2 text-sm font-bold text-[#063b73]"
             >
               View complete product range
@@ -86,7 +89,7 @@ function ProductCategories() {
                 size={17}
                 className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
               />
-            </a>
+            </Link>
           </motion.div>
         </div>
 
@@ -102,10 +105,10 @@ function ProductCategories() {
           className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
         >
           {productCategories.map((category) => (
-            <motion.a
+            <MotionLink
               key={category.id}
               variants={itemVariants}
-              href={category.href}
+              to={category.href}
               className="group relative min-h-[360px] overflow-hidden rounded-2xl bg-[#063b73] shadow-sm transition-shadow duration-500 hover:shadow-2xl"
             >
               {/* Product image */}
@@ -154,7 +157,7 @@ function ProductCategories() {
                   </span>
                 </div>
               </div>
-            </motion.a>
+            </MotionLink>
           ))}
         </motion.div>
       </div>

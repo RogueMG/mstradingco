@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from "motion/react";
+import { Link } from "react-router";
 import {
   ArrowUpRight,
   Building2,
@@ -84,8 +85,8 @@ function ClientTrust() {
             </p>
 
             <div className="mt-8">
-              <a
-                href="/contact"
+              <Link
+                to="/contact"
                 className="group inline-flex items-center gap-2 rounded-full bg-[#f4511e] px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-500/20 transition hover:-translate-y-0.5 hover:bg-[#d94316] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4511e] focus-visible:ring-offset-2"
               >
                 Discuss Your Requirement
@@ -95,7 +96,7 @@ function ClientTrust() {
                   aria-hidden="true"
                   className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                 />
-              </a>
+              </Link>
             </div>
 
             <div className="mt-8 flex items-start gap-3 border-t border-slate-200 pt-6">

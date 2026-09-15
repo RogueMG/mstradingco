@@ -6,6 +6,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
+import { Link } from "react-router";
 
 const values = [
   {
@@ -117,8 +118,8 @@ function WhyChooseUs() {
               a smooth procurement experience.
             </p>
 
-            <a
-              href="/about"
+            <Link
+              to="/about"
               className="group mt-6 inline-flex items-center gap-2 text-sm font-bold text-[#063b73] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f4511e]/30"
             >
               Learn more about us
@@ -129,7 +130,7 @@ function WhyChooseUs() {
                   className="transition-transform duration-300 group-hover:rotate-45"
                 />
               </span>
-            </a>
+            </Link>
           </motion.div>
         </div>
 
