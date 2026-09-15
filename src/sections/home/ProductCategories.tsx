@@ -3,6 +3,7 @@ import { motion, type Variants } from "motion/react";
 import { Link } from "react-router";
 
 import { productCategories } from "../../data/products";
+import { publicAsset } from "../../lib/publicAsset";
 
 const MotionLink = motion.create(Link);
 
@@ -113,7 +114,7 @@ function ProductCategories() {
             >
               {/* Product image */}
               <img
-  src={category.image}
+  src={publicAsset(category.image)}
   alt={`${category.name} products`}
   loading="lazy"
   decoding="async"

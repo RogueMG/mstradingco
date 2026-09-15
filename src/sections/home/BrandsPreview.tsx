@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { Link } from "react-router";
 
 import { brands } from "../../data/brands";
+import { publicAsset } from "../../lib/publicAsset";
 
 const MotionLink = motion.create(Link);
 
@@ -150,7 +151,7 @@ function BrandsPreview() {
                 {/* Logo */}
                 <div className="flex min-h-[65px] items-center justify-center">
   <img
-    src={brand.logo}
+    src={publicAsset(brand.logo)}
     alt={`${brand.name} logo`}
     loading="lazy"
     decoding="async"

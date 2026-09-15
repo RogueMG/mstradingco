@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { industries } from "../../data/industries";
+import { publicAsset } from "../../lib/publicAsset";
 
 function IndustriesPreview() {
   const shouldReduceMotion = useReducedMotion();
@@ -90,7 +91,7 @@ function IndustriesPreview() {
             <AnimatePresence mode="wait">
               <motion.img
                 key={activeIndustry.id}
-                src={activeIndustry.image}
+                src={publicAsset(activeIndustry.image)}
                 alt={`${activeIndustry.name} industry`}
                 initial={
                   shouldReduceMotion
