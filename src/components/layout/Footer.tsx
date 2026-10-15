@@ -26,10 +26,14 @@ function Footer() {
               className="inline-flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4511e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#041f3d]"
               aria-label="MS Trading Co. home"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-sm font-black text-[#063b73]">
-                MS
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1">
+              <img src="/images/logo/ms-trading-logo.png" 
+              alt="MS Trading Co. logo" 
+              className="h-full w-full object-contain" 
+              decoding="async"
+              />
               </div>
-
+              
               <div>
                 <p className="text-lg font-bold tracking-tight">
                   MS Trading Co.
@@ -159,13 +163,6 @@ function Footer() {
                 className="transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4511e]"
               >
                 Brands
-              </a>
-
-              <a
-                href="/gallery"
-                className="transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4511e]"
-              >
-                Gallery
               </a>
 
               <a

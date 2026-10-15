@@ -10,6 +10,7 @@ import Products from "./pages/Products";
 import Brands from "./pages/Brands";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
+import Industries from "./pages/Industries";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/brands" element={<Brands />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/industries" element={<Industries />} />
       </Routes>
     </BrowserRouter>
   );
