@@ -1,75 +1,47 @@
-# React + TypeScript + Vite
+# MS Trading Co. website
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Catalogue website for MS Trading Co., an industrial safety equipment and PPE stockist in Chennai.
+Built with Vite, React, TypeScript and Tailwind CSS, and deployed to GitHub Pages:
+https://roguemg.github.io/mstradingco/
 
-Currently, two official plugins are available:
+The product catalogue is managed in Sanity. The admin (Sanity Studio) is served from the same deployment at
+https://roguemg.github.io/mstradingco/studio/.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Pages
 
-## React Compiler
+| Route | Page |
+| --- | --- |
+| `/` | Home |
+| `/products` | All product categories |
+| `/products/:category` | Products in a category |
+| `/products/:category/:product` | Product details, gallery, specifications and enquiry buttons |
+| `/about`, `/brands`, `/gallery`, `/contact` | Placeholders, still to be built |
+| anything else | Not found |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Scripts
 
-## Expanding the ESLint configuration
+Requires Node 22.18 or newer.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Site dev server at http://localhost:5173/mstradingco/ |
+| `npm run build` | Type-check, build to `dist/`, and write `dist/404.html` for deep links |
+| `npm run lint` | ESLint |
+| `npm run studio` | Studio dev server at http://localhost:3333 (run `npm ci --prefix studio` first) |
+| `npm run seed:build` | Regenerate `sanity/seed.ndjson` from `src/data/catalogue.ts` |
+| `npm run test:queries` | Run the site's GROQ queries against the seed file and check result shapes |
+| `npm run seed --prefix studio` | Import the seed into the `production` dataset, skipping documents that exist |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Content
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- With a `projectId` in `sanity.project.json`, the site reads categories, products and brands from Sanity's
+  public API.
+- With an empty `projectId`, it renders the local starter catalogue in `src/data/catalogue.ts`.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+See [docs/CONTENT_API.md](docs/CONTENT_API.md) for the content model, setup, the read endpoints and their
+queries.
 
-```
+## Deployment
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+Pushing to `main` runs `.github/workflows/main.yml`. It builds the site, builds the Studio into `dist/studio`
+when a projectId is set, and publishes `dist/` to GitHub Pages. Day-to-day work happens on feature branches.
