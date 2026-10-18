@@ -26,6 +26,7 @@ function CategoryPage() {
     return (
       <section className="bg-[#f5f8fc] px-6 pb-24 pt-40">
         <ContentState
+          headingLevel="h1"
           kind="error"
           title="We couldn't load this category"
           message="Please check your connection and try again."
@@ -41,6 +42,7 @@ function CategoryPage() {
     return (
       <section className="bg-[#f5f8fc] px-6 pb-24 pt-40">
         <ContentState
+          headingLevel="h1"
           kind="not-found"
           title="Category not found"
           message="This category may have moved or no longer exists."

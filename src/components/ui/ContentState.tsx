@@ -8,6 +8,8 @@ interface ContentStateProps {
   onRetry?: () => void;
   backHref?: string;
   backLabel?: string;
+  /** Use "h1" when the state replaces the whole page (not found, error). */
+  headingLevel?: "h1" | "h2";
 }
 
 /** Error, not-found and empty states for content-driven pages. */
@@ -18,8 +20,10 @@ function ContentState({
   onRetry,
   backHref,
   backLabel,
+  headingLevel = "h2",
 }: ContentStateProps) {
   const Icon = kind === "error" ? AlertTriangle : SearchX;
+  const Heading = headingLevel;
 
   return (
     <div
@@ -30,9 +34,9 @@ function ContentState({
         <Icon size={24} aria-hidden="true" />
       </span>
 
-      <h2 className="mt-6 text-2xl font-bold tracking-tight text-[#063b73]">
+      <Heading className="mt-6 text-2xl font-bold tracking-tight text-[#063b73]">
         {title}
-      </h2>
+      </Heading>
 
       <p className="mt-3 text-sm leading-6 text-slate-600">{message}</p>
 

@@ -7,6 +7,7 @@ function NotFound() {
   return (
     <section className="bg-[#f5f8fc] px-6 pb-24 pt-40">
       <ContentState
+        headingLevel="h1"
         kind="not-found"
         title="Page not found"
         message="The page you're looking for doesn't exist or has moved."
