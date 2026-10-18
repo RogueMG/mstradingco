@@ -2,13 +2,15 @@ import { ArrowUpRight, CheckCircle2, Clock3 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { Link } from "react-router";
 
-import { brands } from "../../data/brands";
-import { publicAsset } from "../../lib/publicAsset";
+import { useBrands } from "../../lib/content/hooks";
+import { imageSources } from "../../lib/content/image";
 
 const MotionLink = motion.create(Link);
 
 function BrandsPreview() {
   const shouldReduceMotion = useReducedMotion();
+  const result = useBrands();
+  const brands = result.status === "ready" ? result.data : [];
 
   return (
     <section className="relative overflow-hidden bg-[#f5f8fc] py-24 md:py-32">
@@ -102,7 +104,8 @@ function BrandsPreview() {
           className="mt-14 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
         >
           {brands.map((brand, index) => {
-            const isPending = brand.status === "pending";
+            const isPending = !brand.confirmed;
+            const logo = imageSources(brand.logo, 240, [240, 480]);
 
             return (
               <motion.article
@@ -150,9 +153,12 @@ function BrandsPreview() {
 
                 {/* Logo */}
                 <div className="flex min-h-[65px] items-center justify-center">
+  {logo && (
   <img
-    src={publicAsset(brand.logo)}
-    alt={`${brand.name} logo`}
+    src={logo.src}
+    srcSet={logo.srcSet}
+    sizes={logo.srcSet ? "120px" : undefined}
+    alt={brand.logo?.alt || `${brand.name} logo`}
     loading="lazy"
     decoding="async"
     className={`max-h-14 max-w-[120px] object-contain transition-all duration-300 ${
@@ -169,9 +175,10 @@ function BrandsPreview() {
       }
     }}
   />
+  )}
 
   <span
-    style={{ display: "none" }}
+    style={{ display: logo ? "none" : "block" }}
     className={`text-center text-lg font-bold tracking-tight ${
       isPending ? "text-slate-400" : "text-[#063b73]"
     }`}
@@ -183,7 +190,7 @@ function BrandsPreview() {
                 {/* Bottom */}
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                    {brand.category}
+                    {brand.tagline}
                   </p>
 
                   {isPending && (

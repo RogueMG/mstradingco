@@ -1,5 +1,7 @@
+import ComingSoon from "../components/ui/ComingSoon";
+
 function Brands() {
-  return <main>Brands</main>;
+  return <ComingSoon title="Brands We Deal In" eyebrow="Our Brands" />;
 }
 
 export default Brands;
