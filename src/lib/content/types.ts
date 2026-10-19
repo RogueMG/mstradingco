@@ -27,13 +27,8 @@ interface CategoryBase {
   order: number;
 }
 
-/** A category in the listing, with the titles and slugs of its products. */
+/** A category with its product cards. */
 export interface Category extends CategoryBase {
-  products: LinkRef[];
-}
-
-/** A single category page, with full product cards. */
-export interface CategoryDetail extends CategoryBase {
   products: ProductCard[];
 }
 
@@ -67,8 +62,20 @@ export interface Brand {
   name: string;
   slug: string;
   tagline: string;
+  description: string;
   confirmed: boolean;
   inHouse: boolean;
   logo: ContentImage | null;
+  order: number;
+}
+
+export interface Industry {
+  id: string;
+  title: string;
+  slug: string;
+  label: string;
+  summary: string;
+  image: ContentImage | null;
+  showOnHome: boolean;
   order: number;
 }

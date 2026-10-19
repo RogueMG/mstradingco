@@ -11,6 +11,7 @@ import {
   brandsQuery,
   categoriesQuery,
   categoryQuery,
+  industriesQuery,
   productQuery,
 } from "../src/lib/content/queries.ts";
 
@@ -131,12 +132,16 @@ check(
   `product lists add up to ${products.length}`,
 );
 check(
+  categories.every((category) => (category.products as Row[]).every(isCard)),
+  "category products are product cards",
+);
+check(
   categories.every((category) =>
     (category.products as Row[]).every(
-      (product) => typeof product.title === "string" && typeof product.slug === "string",
+      (card) => (card.category as Row).slug === category.slug,
     ),
   ),
-  "category products have title and slug",
+  "category product cards belong to that category",
 );
 
 console.log("categoryQuery");
@@ -264,12 +269,38 @@ check(
       typeof brand.name === "string" &&
       typeof brand.slug === "string" &&
       typeof brand.tagline === "string" &&
+      typeof brand.description === "string" &&
       typeof brand.confirmed === "boolean" &&
       typeof brand.inHouse === "boolean" &&
       typeof brand.order === "number" &&
       (brand.logo === null || isImage(brand.logo)),
   ),
   "every brand has the Brand shape",
+);
+
+console.log("industriesQuery");
+const industryIds = seed.filter((doc) => doc._type === "industry").map((doc) => doc._id);
+const industries = (await run(industriesQuery)) as Row[];
+check(industries.length === industryIds.length, `returns all ${industryIds.length} industries`);
+check(
+  industries.every(
+    (industry) =>
+      typeof industry.id === "string" &&
+      typeof industry.title === "string" &&
+      typeof industry.slug === "string" &&
+      typeof industry.label === "string" &&
+      typeof industry.summary === "string" &&
+      typeof industry.showOnHome === "boolean" &&
+      typeof industry.order === "number" &&
+      isImage(industry.image),
+  ),
+  "every industry has the Industry shape",
+);
+check(
+  industries.every((industry, index) =>
+    index === 0 || (industries[index - 1].order as number) <= (industry.order as number),
+  ),
+  "industries are ordered by order",
 );
 
 console.log(`\n${passes} passed, ${failures} failed`);

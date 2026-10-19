@@ -26,6 +26,12 @@ export const brand = defineType({
       type: "string",
     }),
     defineField({
+      name: "description",
+      description: "One line shown on the Brands page.",
+      type: "text",
+      rows: 2,
+    }),
+    defineField({
       name: "confirmed",
       description: 'Turn off to show the brand as "confirmation pending".',
       type: "boolean",

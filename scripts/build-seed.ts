@@ -13,6 +13,7 @@ import { writeFileSync } from "node:fs";
 import {
   starterBrands,
   starterCategories,
+  starterIndustries,
   starterProducts,
 } from "../src/data/catalogue.ts";
 
@@ -49,9 +50,22 @@ const brands = starterBrands.map((brand, index) => ({
   name: brand.name,
   slug: slug(brand.slug),
   tagline: brand.tagline,
+  description: brand.description,
   confirmed: brand.confirmed,
   inHouse: false,
   logo: link(brand.logo, `${brand.name} logo`),
+  order: (index + 1) * 10,
+}));
+
+const industries = starterIndustries.map((industry, index) => ({
+  _id: `industry-${industry.slug}`,
+  _type: "industry",
+  title: industry.title,
+  slug: slug(industry.slug),
+  label: industry.label,
+  summary: industry.summary,
+  image: link(industry.image, industry.title),
+  showOnHome: true,
   order: (index + 1) * 10,
 }));
 
@@ -87,7 +101,7 @@ const products = starterProducts.map((product) => {
   };
 });
 
-const documents = [...categories, ...brands, ...products];
+const documents = [...categories, ...brands, ...industries, ...products];
 
 const dotted = documents.filter((doc) => doc._id.includes("."));
 
@@ -98,5 +112,5 @@ if (dotted.length > 0) {
 writeFileSync(OUTPUT, documents.map((doc) => JSON.stringify(doc)).join("\n") + "\n");
 
 console.log(
-  `Wrote ${documents.length} documents (${categories.length} categories, ${brands.length} brands, ${products.length} products) to sanity/seed.ndjson`,
+  `Wrote ${documents.length} documents (${categories.length} categories, ${brands.length} brands, ${industries.length} industries, ${products.length} products) to sanity/seed.ndjson`,
 );

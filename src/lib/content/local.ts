@@ -1,6 +1,7 @@
 import {
   starterBrands,
   starterCategories,
+  starterIndustries,
   starterProducts,
   type StarterProduct,
 } from "../../data/catalogue";
@@ -8,8 +9,8 @@ import { publicAsset } from "../publicAsset";
 import type {
   Brand,
   Category,
-  CategoryDetail,
   ContentImage,
+  Industry,
   Product,
   ProductCard,
 } from "./types";
@@ -65,13 +66,10 @@ export const localSource = {
   categories: (): Category[] =>
     starterCategories.map((category) => ({
       ...categoryBase(category.slug),
-      products: productsIn(category.slug).map(({ title, slug }) => ({
-        title,
-        slug,
-      })),
+      products: productsIn(category.slug).map(toCard),
     })),
 
-  category: (slug: string): CategoryDetail | null => {
+  category: (slug: string): Category | null => {
     if (!starterCategories.some((item) => item.slug === slug)) return null;
 
     return {
@@ -109,9 +107,22 @@ export const localSource = {
       name: brand.name,
       slug: brand.slug,
       tagline: brand.tagline,
+      description: brand.description,
       confirmed: brand.confirmed,
       inHouse: false,
       logo: image(brand.logo, `${brand.name} logo`),
+      order: (index + 1) * 10,
+    })),
+
+  industries: (): Industry[] =>
+    starterIndustries.map((industry, index) => ({
+      id: `industry-${industry.slug}`,
+      title: industry.title,
+      slug: industry.slug,
+      label: industry.label,
+      summary: industry.summary,
+      image: image(industry.image, industry.title),
+      showOnHome: true,
       order: (index + 1) * 10,
     })),
 };

@@ -7,12 +7,27 @@ import {
 import { useState } from "react";
 import { Link } from "react-router";
 
-import { industries } from "../../data/industries";
-import { publicAsset } from "../../lib/publicAsset";
+import { useIndustries } from "../../lib/content/hooks";
+import { imageSources } from "../../lib/content/image";
 
 function IndustriesPreview() {
   const shouldReduceMotion = useReducedMotion();
-  const [activeIndustry, setActiveIndustry] = useState(industries[0]);
+  const result = useIndustries();
+  const industries =
+    result.status === "ready"
+      ? result.data.filter((industry) => industry.showOnHome)
+      : [];
+  const [activeId, setActiveId] = useState("");
+
+  const activeIndustry =
+    industries.find((industry) => industry.id === activeId) ??
+    industries[0];
+
+  if (!activeIndustry) return null;
+
+  const activeNumber = String(industries.indexOf(activeIndustry) + 1).padStart(2, "0");
+  const total = String(industries.length).padStart(2, "0");
+  const activeImage = imageSources(activeIndustry.image, 1280);
 
   return (
     <section className="relative overflow-hidden bg-[#063b73] py-24 text-white md:py-32">
@@ -91,8 +106,10 @@ function IndustriesPreview() {
             <AnimatePresence mode="wait">
               <motion.img
                 key={activeIndustry.id}
-                src={publicAsset(activeIndustry.image)}
-                alt={`${activeIndustry.name} industry`}
+                src={activeImage?.src}
+                srcSet={activeImage?.srcSet}
+                sizes={activeImage?.srcSet ? "(min-width: 1024px) 55vw, 100vw" : undefined}
+                alt={activeIndustry.image?.alt || `${activeIndustry.title} industry`}
                 initial={
                   shouldReduceMotion
                     ? false
@@ -133,16 +150,16 @@ function IndustriesPreview() {
                 </span>
 
                 <span className="text-xs font-bold uppercase tracking-[0.16em] text-white/60">
-                  {activeIndustry.number} / 07
+                  {activeNumber} / {total}
                 </span>
               </div>
 
               <h3 className="text-3xl font-bold md:text-4xl">
-                {activeIndustry.name}
+                {activeIndustry.title}
               </h3>
 
               <p className="mt-3 max-w-lg text-sm leading-6 text-white/70 md:text-base">
-                {activeIndustry.description}
+                {activeIndustry.summary}
               </p>
             </motion.div>
           </div>
@@ -150,15 +167,15 @@ function IndustriesPreview() {
           {/* Industry navigation */}
           <div className="flex flex-col">
             <div className="flex-1">
-              {industries.map((industry) => {
+              {industries.map((industry, index) => {
                 const isActive = activeIndustry.id === industry.id;
 
                 return (
                   <button
                     key={industry.id}
                     type="button"
-                    onClick={() => setActiveIndustry(industry)}
-                    onMouseEnter={() => setActiveIndustry(industry)}
+                    onClick={() => setActiveId(industry.id)}
+                    onMouseEnter={() => setActiveId(industry.id)}
                     aria-pressed={isActive}
                     className={`group relative flex w-full items-center gap-5 border-b border-white/10 px-6 py-5 text-left transition-colors duration-300 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-[#f4511e]/50 md:px-8 ${
                       isActive
@@ -182,7 +199,7 @@ function IndustriesPreview() {
                           : "text-white/30"
                       }`}
                     >
-                      {industry.number}
+                      {String(index + 1).padStart(2, "0")}
                     </span>
 
                     <span className="flex-1">
@@ -193,11 +210,11 @@ function IndustriesPreview() {
                             : "text-white/65 group-hover:text-white"
                         }`}
                       >
-                        {industry.name}
+                        {industry.title}
                       </span>
 
                       <span className="mt-1 block text-xs text-white/35">
-                        {industry.shortName}
+                        {industry.label}
                       </span>
                     </span>
 

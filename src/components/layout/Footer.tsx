@@ -2,6 +2,7 @@ import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
 import { Link } from "react-router";
 
 import { useCategories } from "../../lib/content/hooks";
+import { publicAsset } from "../../lib/publicAsset";
 
 function Footer() {
   const categories = useCategories();
@@ -24,8 +25,13 @@ function Footer() {
               className="inline-flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4511e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#041f3d]"
               aria-label="MS Trading Co. home"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-sm font-black text-[#063b73]">
-                MS
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1">
+                <img
+                  src={publicAsset("/images/logo/ms-trading-logo.png")}
+                  alt=""
+                  className="h-full w-full object-contain"
+                  decoding="async"
+                />
               </div>
 
               <div>
@@ -168,10 +174,10 @@ function Footer() {
               </Link>
 
               <Link
-                to="/gallery"
+                to="/industries"
                 className="transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4511e]"
               >
-                Gallery
+                Industries
               </Link>
 
               <Link

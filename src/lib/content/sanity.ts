@@ -3,9 +3,10 @@ import {
   brandsQuery,
   categoriesQuery,
   categoryQuery,
+  industriesQuery,
   productQuery,
 } from "./queries";
-import type { Brand, Category, CategoryDetail, Product } from "./types";
+import type { Brand, Category, Industry, Product } from "./types";
 
 type Params = Record<string, string | number | boolean>;
 
@@ -37,8 +38,9 @@ async function query<T>(groq: string, params: Params = {}): Promise<T> {
 
 export const sanitySource = {
   categories: () => query<Category[]>(categoriesQuery),
-  category: (slug: string) => query<CategoryDetail | null>(categoryQuery, { slug }),
+  category: (slug: string) => query<Category | null>(categoryQuery, { slug }),
   product: (category: string, slug: string) =>
     query<Product | null>(productQuery, { category, slug }),
   brands: () => query<Brand[]>(brandsQuery),
+  industries: () => query<Industry[]>(industriesQuery),
 };

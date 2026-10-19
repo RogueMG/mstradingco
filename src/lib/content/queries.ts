@@ -31,17 +31,16 @@ const productCardFields = `
 
 const productOrder = `order(coalesce(order, 100) asc, title asc)`;
 
-/** All categories in display order, each with its products' titles and slugs. Returns Category[]. */
+/** All categories in display order, each with its product cards. Returns Category[]. */
 export const categoriesQuery = `
 *[_type == "category" && defined(slug.current)] | order(coalesce(order, 100) asc, title asc) {
   ${categoryFields},
   "products": *[_type == "product" && category._ref == ^._id && defined(slug.current)] | ${productOrder} {
-    title,
-    "slug": slug.current
+    ${productCardFields}
   }
 }`;
 
-/** One category by $slug, with product cards. Returns CategoryDetail | null. */
+/** One category by $slug, with product cards. Returns Category | null. */
 export const categoryQuery = `
 *[_type == "category" && slug.current == $slug][0] {
   ${categoryFields},
@@ -75,8 +74,22 @@ export const brandsQuery = `
   name,
   "slug": slug.current,
   "tagline": coalesce(tagline, ""),
+  "description": coalesce(description, ""),
   "confirmed": coalesce(confirmed, true),
   "inHouse": coalesce(inHouse, false),
   "logo": logo{ ${imageFields} },
+  "order": coalesce(order, 100)
+}`;
+
+/** All industries in display order. Returns Industry[]. */
+export const industriesQuery = `
+*[_type == "industry" && defined(slug.current)] | order(coalesce(order, 100) asc, title asc) {
+  "id": _id,
+  title,
+  "slug": slug.current,
+  "label": coalesce(label, ""),
+  "summary": coalesce(summary, ""),
+  "image": image{ ${imageFields} },
+  "showOnHome": coalesce(showOnHome, true),
   "order": coalesce(order, 100)
 }`;
