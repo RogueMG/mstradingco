@@ -1,5 +1,7 @@
+import ComingSoon from "../components/ui/ComingSoon";
+
 function Contact() {
-  return <main>Contact</main>;
+  return <ComingSoon title="Contact Us" eyebrow="Get in Touch" />;
 }
 
 export default Contact;

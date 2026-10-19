@@ -2,10 +2,8 @@ import { ArrowUpRight } from "lucide-react";
 import { motion, type Variants } from "motion/react";
 import { Link } from "react-router";
 
-import { productCategories } from "../../data/products";
-import { publicAsset } from "../../lib/publicAsset";
-
-const MotionLink = motion.create(Link);
+import CategoryCard from "../../components/products/CategoryCard";
+import { useCategories } from "../../lib/content/hooks";
 
 const containerVariants: Variants = {
   hidden: {},
@@ -16,22 +14,13 @@ const containerVariants: Variants = {
   },
 };
 
-const itemVariants: Variants = {
-  hidden: {
-    opacity: 0,
-    y: 35,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.65,
-      ease: "easeOut",
-    },
-  },
-};
-
 function ProductCategories() {
+  const categories = useCategories();
+  const homeCategories =
+    categories.status === "ready"
+      ? categories.data.filter((category) => category.showOnHome)
+      : [];
+
   return (
     <section
       id="products"
@@ -95,72 +84,49 @@ function ProductCategories() {
         </div>
 
         {/* Category grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{
-            once: true,
-            amount: 0.08,
-          }}
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-        >
-          {productCategories.map((category) => (
-            <MotionLink
-              key={category.id}
-              variants={itemVariants}
-              to={category.href}
-              className="group relative min-h-[360px] overflow-hidden rounded-2xl bg-[#063b73] shadow-sm transition-shadow duration-500 hover:shadow-2xl"
-            >
-              {/* Product image */}
-              <img
-  src={publicAsset(category.image)}
-  alt={`${category.name} products`}
-  loading="lazy"
-  decoding="async"
-  onError={(event) => {
-    event.currentTarget.style.display = "none";
-  }}
-  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-/>
+        {categories.status === "loading" && (
+          <div
+            aria-hidden="true"
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            {Array.from({ length: 4 }, (_, index) => (
+              <div
+                key={index}
+                className="min-h-[360px] animate-pulse rounded-2xl bg-[#063b73]/10"
+              />
+            ))}
+          </div>
+        )}
 
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#031d36] via-[#063b73]/35 to-transparent" />
+        {categories.status === "error" && (
+          <p className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
+            Product categories couldn't be loaded right now.{" "}
+            <Link to="/products" className="font-bold text-[#063b73]">
+              View the product range
+            </Link>
+          </p>
+        )}
 
-              {/* Number */}
-              <div className="absolute right-5 top-5">
-                <span className="text-xs font-semibold tracking-[0.2em] text-white/60">
-                  {category.number}
-                </span>
-              </div>
-
-              {/* Content */}
-              <div className="absolute inset-x-0 bottom-0 p-6">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-[#ff8a65]">
-                  {category.shortName}
-                </p>
-
-                <h3 className="text-2xl font-bold text-white">
-                  {category.name}
-                </h3>
-
-                <p className="mt-3 max-w-xs text-sm leading-6 text-white/75">
-                  {category.description}
-                </p>
-
-                <div className="mt-6 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-white">
-                    Explore category
-                  </span>
-
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f4511e] text-white transition-transform duration-300 group-hover:rotate-45">
-                    <ArrowUpRight size={18} />
-                  </span>
-                </div>
-              </div>
-            </MotionLink>
-          ))}
-        </motion.div>
+        {homeCategories.length > 0 && (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{
+              once: true,
+              amount: 0.08,
+            }}
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            {homeCategories.map((category, index) => (
+              <CategoryCard
+                key={category.id}
+                category={category}
+                index={index}
+              />
+            ))}
+          </motion.div>
+        )}
       </div>
     </section>
   );

@@ -1,5 +1,7 @@
+import ComingSoon from "../components/ui/ComingSoon";
+
 function About() {
-  return <main>About MS Trading Co.</main>;
+  return <ComingSoon title="About Us" eyebrow="About MS Trading Co." />;
 }
 
 export default About;

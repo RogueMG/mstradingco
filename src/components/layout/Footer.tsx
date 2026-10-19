@@ -1,21 +1,18 @@
 import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
 import { Link } from "react-router";
 
-const productLinks = [
-  { label: "Head Protection", href: "/products#head-protection" },
-  { label: "Foot Protection", href: "/products#foot-protection" },
-  { label: "Body & PPE", href: "/products#body-ppe" },
-  {
-    label: "Eye, Ear & Respiratory",
-    href: "/products#eye-ear-respiratory",
-  },
-  { label: "Road & Site Safety", href: "/products#road-site-safety" },
-  { label: "Power Tools", href: "/products#power-tools" },
-  { label: "Hand Tools", href: "/products#hand-tools" },
-  { label: "Steel & Hardware", href: "/products#steel-hardware" },
-];
+import { useCategories } from "../../lib/content/hooks";
 
 function Footer() {
+  const categories = useCategories();
+  const productLinks =
+    categories.status === "ready"
+      ? categories.data.map((category) => ({
+          label: category.title,
+          href: `/products/${category.slug}`,
+        }))
+      : [];
+
   return (
     <footer className="bg-[#041f3d] text-white">
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
@@ -77,6 +74,14 @@ function Footer() {
                     </Link>
                   </li>
                 ))}
+                <li>
+                  <Link
+                    to="/products"
+                    className="text-sm font-semibold text-white transition hover:text-[#f4511e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4511e]"
+                  >
+                    All products
+                  </Link>
+                </li>
               </ul>
             </nav>
           </div>

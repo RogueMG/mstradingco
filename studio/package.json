@@ -1,0 +1,27 @@
+{
+  "name": "mstradingco-studio",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build ../dist/studio --yes",
+    "seed": "sanity dataset import ../sanity/seed.ndjson production --missing"
+  },
+  "dependencies": {
+    "@sanity/icons": "^5.2.3",
+    "@sanity/vision": "^6.19.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "sanity": "^6.19.0",
+    "styled-components": "^6.6.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "groq-js": "^2.0.0",
+    "typescript": "~6.0.2"
+  }
+}
