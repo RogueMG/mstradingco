@@ -12,11 +12,19 @@ https://roguemg.github.io/mstradingco/studio/.
 | Route | Page |
 | --- | --- |
 | `/` | Home |
-| `/products` | All product categories |
-| `/products/:category` | Products in a category |
+| `/about` | Company story, product areas and industries |
+| `/products` | Catalogue with category tabs and search |
+| `/products/:category` | The catalogue with that category's tab selected |
 | `/products/:category/:product` | Product details, gallery, specifications and enquiry buttons |
-| `/about`, `/brands`, `/gallery`, `/contact` | Placeholders, still to be built |
+| `/brands` | Brands we deal in |
+| `/industries` | Industries served |
+| `/contact` | Contact details and enquiry form |
+| `/gallery` | Placeholder (not in the nav until photos are supplied) |
 | anything else | Not found |
+
+Products, categories, brands and industries come from Sanity. Every "Enquire" / "Request a quote"
+action opens one shared enquiry form. There is no form backend: the form opens WhatsApp or the
+visitor's email app with the details filled in, ready to send.
 
 ## Scripts
 

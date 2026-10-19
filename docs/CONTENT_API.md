@@ -1,6 +1,6 @@
 # Content API
 
-The product catalogue (categories, products, brands) lives in [Sanity](https://www.sanity.io).
+The product catalogue (categories, products, brands) and the industries served live in [Sanity](https://www.sanity.io).
 Editors manage it in Sanity Studio; the website reads it from Sanity's public HTTP API.
 Anyone can read the same data with a plain HTTP GET. No token is needed and none is ever used by the site.
 
@@ -77,7 +77,20 @@ Pushing to `main` builds the site and, when `projectId` is set, the Studio into 
 | `tagline` | string | What the brand covers, e.g. "Power Tools" |
 | `confirmed` | boolean | Defaults to `true`. `false` shows "confirmation pending" on the home page |
 | `inHouse` | boolean | Defaults to `false`. The company's own range |
+| `description` | text | One line shown on the Brands page |
 | `logo` | mediaImage | Optional |
+| `order` | number | Defaults to `100` |
+
+### Industry (`industry`)
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `title` | string | Required |
+| `slug` | slug | Required |
+| `label` | string | Short name used on tabs, e.g. "Energy" |
+| `summary` | text | Up to ~200 characters |
+| `image` | mediaImage | Required |
+| `showOnHome` | boolean | Defaults to `true` |
 | `order` | number | Defaults to `100` |
 
 ### Product (`product`)
@@ -137,10 +150,11 @@ back with their defaults, never `null`.
 
 | Export | Parameters | Returns |
 | --- | --- | --- |
-| `categoriesQuery` | none | `Category[]`: every category in display order, each with `products: {title, slug}[]` |
-| `categoryQuery` | `$slug` | `CategoryDetail \| null`: one category with `products: ProductCard[]` |
+| `categoriesQuery` | none | `Category[]`: every category in display order, each with `products: ProductCard[]` |
+| `categoryQuery` | `$slug` | `Category \| null`: one category with `products: ProductCard[]` |
 | `productQuery` | `$category`, `$slug` | `Product \| null`: matches only if the product is filed under `$category`. Includes `related: ProductCard[]` (up to 3 others from the same category) |
 | `brandsQuery` | none | `Brand[]` in display order |
+| `industriesQuery` | none | `Industry[]` in display order |
 
 Key shapes:
 
@@ -152,8 +166,10 @@ Product       = ProductCard & { images: ContentImage[], keyFeatures: string[],
                   description: PortableTextBlock[], specifications: { label, value }[],
                   variants: string[], related: ProductCard[] }
 Category      = { id, title, slug, eyebrow, summary, image, showOnHome, order,
-                  products: { title, slug }[] }
-Brand         = { id, name, slug, tagline, confirmed, inHouse, logo: ContentImage | null, order }
+                  products: ProductCard[] }
+Brand         = { id, name, slug, tagline, description, confirmed, inHouse,
+                  logo: ContentImage | null, order }
+Industry      = { id, title, slug, label, summary, image, showOnHome, order }
 ```
 
 ### curl example
@@ -175,6 +191,17 @@ and `npm run test:queries` checks for them.
 
 When verifying content, query the **public** endpoint (the curl above), not `npx sanity documents query`,
 which is authenticated and can see hidden documents.
+
+## Adding fields to existing documents
+
+`npm run seed --prefix studio` only creates documents that don't exist yet, so new fields on existing
+documents need a backfill. `studio/scripts/backfill-brand-descriptions.ts` is an example: it uses
+`setIfMissing`, so it never overwrites edits made in the Studio.
+
+```bash
+cd studio
+npx sanity exec scripts/backfill-brand-descriptions.ts --with-user-token
+```
 
 ## Free plan limits
 
