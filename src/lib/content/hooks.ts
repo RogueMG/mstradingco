@@ -4,7 +4,7 @@ import { cmsEnabled } from "./config";
 import { localSource } from "./local";
 import { sanitySource } from "./sanity";
 import { invalidate, read, subscribe, type ContentResult } from "./store";
-import type { Brand, Category, CategoryDetail, Product } from "./types";
+import type { Brand, Category, Industry, Product } from "./types";
 
 const source = cmsEnabled ? sanitySource : localSource;
 
@@ -25,12 +25,6 @@ export function useCategories() {
   return useContent<Category[]>("categories", () => source.categories());
 }
 
-export function useCategory(slug: string) {
-  return useContent<CategoryDetail | null>(`category:${slug}`, () =>
-    source.category(slug),
-  );
-}
-
 export function useProduct(category: string, slug: string) {
   return useContent<Product | null>(`product:${category}/${slug}`, () =>
     source.product(category, slug),
@@ -39,4 +33,8 @@ export function useProduct(category: string, slug: string) {
 
 export function useBrands() {
   return useContent<Brand[]>("brands", () => source.brands());
+}
+
+export function useIndustries() {
+  return useContent<Industry[]>("industries", () => source.industries());
 }

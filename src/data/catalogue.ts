@@ -18,8 +18,17 @@ export interface StarterBrand {
   slug: string;
   name: string;
   tagline: string;
+  description: string;
   confirmed: boolean;
   logo: string;
+}
+
+export interface StarterIndustry {
+  slug: string;
+  title: string;
+  label: string;
+  summary: string;
+  image: string;
 }
 
 export interface StarterProduct {
@@ -102,6 +111,8 @@ export const starterBrands: StarterBrand[] = [
     slug: "udyogi",
     name: "Udyogi",
     tagline: "Safety PPE",
+    description:
+      "General industrial safety and personal protective equipment.",
     confirmed: true,
     logo: "/images/brands/udyogi.png",
   },
@@ -109,6 +120,8 @@ export const starterBrands: StarterBrand[] = [
     slug: "3m",
     name: "3M",
     tagline: "PPE & Protection",
+    description:
+      "PPE, respiratory protection and hearing protection.",
     confirmed: true,
     logo: "/images/brands/3m.png",
   },
@@ -116,6 +129,8 @@ export const starterBrands: StarterBrand[] = [
     slug: "allen-cooper",
     name: "Allen Cooper",
     tagline: "Safety Footwear",
+    description:
+      "Industrial safety footwear and protective equipment.",
     confirmed: true,
     logo: "/images/brands/allen-cooper.png",
   },
@@ -123,6 +138,8 @@ export const starterBrands: StarterBrand[] = [
     slug: "tiger",
     name: "Tiger Industrial Safety Gear",
     tagline: "Industrial Safety",
+    description:
+      "Industrial safety gear and workplace protection products.",
     confirmed: true,
     logo: "/images/brands/tiger.png",
   },
@@ -130,6 +147,8 @@ export const starterBrands: StarterBrand[] = [
     slug: "safe-dot",
     name: "Safe Dot",
     tagline: "Safety Footwear",
+    description:
+      "Safety footwear and workplace protection products.",
     confirmed: true,
     logo: "/images/brands/safe-dot.png",
   },
@@ -137,6 +156,8 @@ export const starterBrands: StarterBrand[] = [
     slug: "fortune",
     name: "Fortune",
     tagline: "Foot Protection",
+    description:
+      "Protective footwear and industrial gumboots.",
     confirmed: true,
     logo: "/images/brands/fortune.png",
   },
@@ -144,6 +165,8 @@ export const starterBrands: StarterBrand[] = [
     slug: "karam",
     name: "Karam",
     tagline: "Fall Protection",
+    description:
+      "Fall protection and personal protective equipment.",
     confirmed: true,
     logo: "/images/brands/karam.png",
   },
@@ -151,6 +174,8 @@ export const starterBrands: StarterBrand[] = [
     slug: "bosch",
     name: "Bosch",
     tagline: "Power Tools",
+    description:
+      "Professional power tools for industrial applications.",
     confirmed: true,
     logo: "/images/brands/bosch.png",
   },
@@ -158,6 +183,8 @@ export const starterBrands: StarterBrand[] = [
     slug: "taparia",
     name: "Taparia",
     tagline: "Hand Tools",
+    description:
+      "Professional hand tools for industrial and workplace use.",
     confirmed: true,
     logo: "/images/brands/taparia.png",
   },
@@ -165,6 +192,8 @@ export const starterBrands: StarterBrand[] = [
     slug: "tvs",
     name: "TVS",
     tagline: "To Be Confirmed",
+    description:
+      "Product relationship to be confirmed by MS Trading Co.",
     confirmed: false,
     logo: "/images/brands/tvs.png",
   },
@@ -172,6 +201,8 @@ export const starterBrands: StarterBrand[] = [
     slug: "jsw-steel",
     name: "JSW Steel",
     tagline: "To Be Confirmed",
+    description:
+      "Product relationship to be confirmed by MS Trading Co.",
     confirmed: false,
     logo: "/images/brands/jsw-steel.png",
   },
@@ -179,8 +210,69 @@ export const starterBrands: StarterBrand[] = [
     slug: "jindal-star",
     name: "Jindal Star",
     tagline: "To Be Confirmed",
+    description:
+      "Product relationship to be confirmed by MS Trading Co.",
     confirmed: false,
     logo: "/images/brands/jindal-star.png",
+  },
+];
+
+export const starterIndustries: StarterIndustry[] = [
+  {
+    slug: "construction",
+    title: "Construction",
+    label: "Construction & Sites",
+    summary:
+      "Safety equipment, PPE and site essentials for construction teams and project environments.",
+    image: "/images/industries/construction.png",
+  },
+  {
+    slug: "manufacturing",
+    title: "Manufacturing & Automobile",
+    label: "Manufacturing",
+    summary:
+      "Workplace protection and industrial tools for manufacturing and automobile operations.",
+    image: "/images/industries/manufacturing.png",
+  },
+  {
+    slug: "oil-gas-power",
+    title: "Oil, Gas & Power",
+    label: "Energy",
+    summary:
+      "Industrial safety products for demanding energy, power and project environments.",
+    image: "/images/industries/oil-gas-power.png",
+  },
+  {
+    slug: "pharma-healthcare",
+    title: "Pharma & Healthcare",
+    label: "Healthcare",
+    summary:
+      "Protective equipment and workplace safety products for healthcare and pharmaceutical environments.",
+    image: "/images/industries/pharma-healthcare.png",
+  },
+  {
+    slug: "food-processing",
+    title: "Food Processing",
+    label: "Food Industry",
+    summary:
+      "Workplace safety and protective equipment for food-processing environments.",
+    image: "/images/industries/food-processing.png",
+  },
+  {
+    slug: "government-infrastructure",
+    title: "Government & Infrastructure",
+    label: "Infrastructure",
+    summary:
+      "Safety equipment and site products for infrastructure and public-sector requirements.",
+    image: "/images/industries/government-infrastructure.png",
+  },
+  {
+    slug: "warehousing-logistics",
+    title: "Warehousing & Logistics",
+    label: "Logistics",
+    summary:
+      "PPE and workplace safety products for warehouses, logistics operations and facilities.",
+    image: "/images/industries/warehousing-logistics.png",
   },
 ];
 
