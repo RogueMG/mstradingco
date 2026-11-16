@@ -7,10 +7,20 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "typecheck": "tsc -b && tsc -p functions && tsc -p workers/mailer",
+    "preview": "vite preview",
+    "db:seed:build": "node scripts/build-seed-sql.ts",
+    "db:migrate:local": "wrangler d1 migrations apply mstradingco-db --local",
+    "db:seed:local": "npm run db:seed:build && wrangler d1 execute mstradingco-db --local --file db/seed.sql",
+    "db:migrate:remote": "wrangler d1 migrations apply mstradingco-db --remote",
+    "db:seed:remote": "npm run db:seed:build && wrangler d1 execute mstradingco-db --remote --file db/seed.sql",
+    "dev:cf": "npm run build && npm run db:migrate:local && npm run db:seed:local && wrangler pages dev --port 8788"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@tiptap/pm": "^3.34.0",
+    "@tiptap/react": "^3.34.0",
+    "@tiptap/starter-kit": "^3.34.0",
     "lucide-react": "^1.45.0",
     "motion": "^13.2.0",
     "react": "^19.2.8",
@@ -19,6 +29,7 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261116.1",
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
@@ -30,7 +41,8 @@
     "globals": "^17.12.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.69.0",
-    "vite": "^8.3.0"
+    "vite": "^8.3.0",
+    "wrangler": "^4.163.0"
   },
   "engines": {
     "node": ">=22.18"

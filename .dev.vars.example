@@ -1,0 +1,10 @@
+# Copy to .dev.vars for `npm run dev:cf`. .dev.vars is git-ignored and used only
+# by local wrangler; it never reaches Cloudflare.
+
+# Skip the Cloudflare Access check for /admin and /api/admin/*. Only honoured
+# when the request host is localhost or 127.0.0.1.
+DEV_BYPASS_ACCESS=true
+
+# Cloudflare's published Turnstile test keys (always pass). Never use these in production.
+TURNSTILE_SITE_KEY=1x00000000000000000000AA
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA

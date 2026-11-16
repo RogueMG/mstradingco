@@ -1,0 +1,39 @@
+# Cloudflare Pages project for the MS Trading Co. site.
+# The site is static (dist/); Functions in functions/ serve the API, media,
+# SEO metadata, sitemap and enquiries. See docs/API.md.
+name = "mstradingco"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-11-01"
+
+[vars]
+# Cloudflare Access (Zero Trust) for /admin and /api/admin/*. Not secret.
+# Team domain looks like "https://<team>.cloudflareaccess.com"; the audience
+# (AUD) tag is on the Access application's Overview page.
+ACCESS_TEAM_DOMAIN = ""
+ACCESS_AUD = ""
+# Turnstile site key (public). The secret goes in with:
+#   npx wrangler pages secret put TURNSTILE_SECRET
+TURNSTILE_SITE_KEY = ""
+# Optional canonical origin once a custom domain is live, e.g. "https://www.example.com".
+# Empty = use the origin of each request.
+SITE_URL = ""
+# "From" address for enquiry emails, on the custom domain with Email Routing enabled.
+MAIL_FROM = ""
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mstradingco-db"
+# Filled in after `npx wrangler d1 create mstradingco-db`. Local dev works without it.
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "mstradingco-media"
+
+# Enquiry emails: Pages Functions can't use the send_email binding, so a small
+# Worker (workers/mailer) sends them. Uncomment after deploying that Worker and
+# enabling Email Routing on the custom domain (docs/API.md, "Enquiry emails").
+# [[services]]
+# binding = "MAILER"
+# service = "mstradingco-mailer"
