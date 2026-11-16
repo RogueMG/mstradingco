@@ -3,7 +3,7 @@ import { motion, type Variants } from "motion/react";
 import { Link } from "react-router";
 
 import ContentImg from "../ui/ContentImg";
-import type { Category } from "../../lib/content/types";
+import type { TreeCategory } from "../../lib/content/types";
 
 const MotionLink = motion.create(Link);
 
@@ -23,17 +23,17 @@ const categoryCardVariants: Variants = {
 };
 
 interface CategoryCardProps {
-  category: Category;
+  category: TreeCategory;
   index: number;
 }
 
 function CategoryCard({ category, index }: CategoryCardProps) {
-  const count = category.products.length;
+  const count = category.productCount;
 
   return (
     <MotionLink
       variants={categoryCardVariants}
-      to={`/products/${category.slug}`}
+      to={`/products/${category.path}`}
       className="group relative min-h-[360px] overflow-hidden rounded-2xl bg-[#063b73] shadow-sm transition-shadow duration-500 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f4511e]/40"
     >
       {/* Category image */}

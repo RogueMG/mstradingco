@@ -5,75 +5,50 @@ import {
   ChevronRight,
   Search,
 } from "lucide-react";
-import { useNavigate, useParams } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 import ProductGrid from "../components/products/ProductGrid";
 import ContentImg from "../components/ui/ContentImg";
 import ContentState from "../components/ui/ContentState";
 import PageLoading from "../components/ui/PageLoading";
 import { useEnquiry } from "../hooks/useEnquiry";
-import { useCategories } from "../lib/content/hooks";
-import type { Category } from "../lib/content/types";
+import { useNode, useTree } from "../lib/content/hooks";
+import { categoryMatches } from "../lib/content/tree";
+import type { CategoryNode, TreeCategory } from "../lib/content/types";
 import { publicAsset } from "../lib/publicAsset";
 import { usePageMeta } from "../lib/usePageMeta";
 
-/** True when the category, or any of its products or brands, matches the search. */
-function matches(category: Category, query: string) {
-  const haystack = [
-    category.title,
-    category.eyebrow,
-    category.summary,
-    ...category.products.flatMap((product) => [
-      product.title,
-      product.brand?.name ?? "",
-    ]),
-  ]
-    .join(" ")
-    .toLowerCase();
+const EMPTY: TreeCategory[] = [];
 
-  return haystack.includes(query);
-}
-
-function Products() {
-  const { category: categoryParam } = useParams();
+/**
+ * The catalogue: top-level categories in the sidebar, the active category
+ * (any depth) in the main panel. `path` is relative to /products ("" = first category).
+ */
+function Products({ path }: { path: string }) {
   const navigate = useNavigate();
-  const { openEnquiry } = useEnquiry();
-  const result = useCategories();
-  const categories = useMemo(
-    () => (result.status === "ready" ? result.data : []),
-    [result],
-  );
+  const tree = useTree();
+  const roots = tree.status === "ready" ? tree.data : EMPTY;
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredCategories = useMemo(() => {
+  const filteredRoots = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-
-    if (!query) {
-      return categories;
-    }
-
-    return categories.filter((category) => matches(category, query));
-  }, [categories, searchQuery]);
+    return query ? roots.filter((category) => categoryMatches(category, query)) : roots;
+  }, [roots, searchQuery]);
 
   /*
-   * The active category comes from the URL (/products/<slug>).
-   * Without one, or when a search hides it, the first match is shown.
+   * The active top-level category comes from the URL's first segment. When a
+   * search hides it, the first matching category is shown instead.
    */
-  const requested = categoryParam
-    ? categories.find((category) => category.slug === categoryParam)
-    : undefined;
-  const unknownCategory =
-    result.status === "ready" && Boolean(categoryParam) && !requested;
+  const requestedRoot = roots.find((category) => category.slug === path.split("/")[0]);
+  const activeRoot =
+    requestedRoot && filteredRoots.includes(requestedRoot) ? requestedRoot : filteredRoots[0];
+  const activePath = requestedRoot === activeRoot && path ? path : (activeRoot?.path ?? "");
+  const activeIndex = activeRoot ? roots.indexOf(activeRoot) : -1;
 
-  const activeProductCategory =
-    requested && filteredCategories.includes(requested)
-      ? requested
-      : filteredCategories[0];
-
-  const activeIndex = activeProductCategory
-    ? categories.indexOf(activeProductCategory)
-    : -1;
+  const node = useNode(activePath);
+  const categoryNode: CategoryNode | null =
+    node.status === "ready" && node.data?.kind === "category" ? node.data : null;
 
   /*
    * Switching tabs updates the URL without a new history entry
@@ -88,8 +63,8 @@ function Products() {
   };
 
   usePageMeta(
-    requested ? requested.title : unknownCategory ? "Category not found" : "Products",
-    requested?.summary ||
+    path && categoryNode ? categoryNode.category.title : "Products",
+    (path && categoryNode?.category.summary) ||
       "Browse industrial safety helmets, safety footwear, PPE, eye, ear and respiratory protection, site safety, power tools and hand tools from MS Trading Co., Chennai.",
   );
 
@@ -342,28 +317,28 @@ function Products() {
               </div>
             </div>
 
-            {result.status === "loading" && <PageLoading />}
+            {tree.status === "loading" && <PageLoading />}
 
-            {result.status === "error" && (
+            {tree.status === "error" && (
               <ContentState
                 kind="error"
                 title="We couldn't load the catalogue"
                 message="Please check your connection and try again."
-                onRetry={result.retry}
+                onRetry={tree.retry}
               />
             )}
 
-            {unknownCategory && (
-              <div className="mb-10">
-                <ContentState
-                  kind="not-found"
-                  title="Category not found"
-                  message="That category may have moved. Pick one from the list below."
-                />
-              </div>
+            {tree.status === "ready" && roots.length === 0 && (
+              <ContentState
+                kind="empty"
+                title="Catalogue coming soon"
+                message="Our product categories are being added. Contact us for anything you need in the meantime."
+                backHref="/contact"
+                backLabel="Contact us"
+              />
             )}
 
-            {result.status === "ready" && (
+            {tree.status === "ready" && roots.length > 0 && (
             <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
               {/* =================================================
                   CATEGORY SIDEBAR
@@ -375,17 +350,14 @@ function Products() {
 
                 <nav aria-label="Product categories">
                   <div className="space-y-1">
-                    {filteredCategories.map((category) => {
-                      const isActive =
-                        category.id === activeProductCategory?.id;
+                    {filteredRoots.map((category) => {
+                      const isActive = category.id === activeRoot?.id;
 
                       return (
                         <button
                           key={category.id}
                           type="button"
-                          onClick={() =>
-                            handleCategoryChange(category.slug)
-                          }
+                          onClick={() => handleCategoryChange(category.path)}
                           aria-pressed={isActive}
                           className={`group flex w-full items-center justify-between rounded-xl px-4 py-3.5 text-left text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4511e] ${
                             isActive
@@ -410,7 +382,7 @@ function Products() {
                   </div>
                 </nav>
 
-                {filteredCategories.length === 0 && (
+                {filteredRoots.length === 0 && (
                   <div className="rounded-xl bg-slate-50 p-5">
                     <p className="text-sm font-semibold text-[#063b73]">
                       No categories found
@@ -428,153 +400,35 @@ function Products() {
               </aside>
 
               {/* =================================================
-                  ACTIVE CATEGORY
+                  ACTIVE CATEGORY (any depth)
               ================================================== */}
-              <div>
+              <div className="min-w-0">
+                {node.status === "loading" && activePath && <PageLoading />}
+
+                {node.status === "error" && (
+                  <ContentState
+                    kind="error"
+                    title="We couldn't load this category"
+                    message="Please check your connection and try again."
+                    onRetry={node.retry}
+                  />
+                )}
+
+                {node.status === "ready" && !categoryNode && activePath && (
+                  <ContentState
+                    kind="not-found"
+                    title="Category not found"
+                    message="That category may have moved. Pick one from the list."
+                  />
+                )}
+
                 <AnimatePresence mode="wait">
-                  {activeProductCategory && (
-                    <motion.div
-                      key={activeProductCategory.id}
-                      initial={{
-                        opacity: 0,
-                        y: 15,
-                      }}
-                      animate={{
-                        opacity: 1,
-                        y: 0,
-                      }}
-                      exit={{
-                        opacity: 0,
-                        y: -10,
-                      }}
-                      transition={{
-                        duration: 0.35,
-                        ease: "easeOut",
-                      }}
-                    >
-                      {/* Category Hero */}
-                      <div className="group relative mb-8 min-h-[360px] overflow-hidden rounded-3xl bg-[#063b73] md:min-h-[440px]">
-                        <ContentImg
-                          image={activeProductCategory.image}
-                          fallbackAlt=""
-                          sizes="(min-width: 1024px) 66vw, 100vw"
-                          loading="eager"
-                          className="absolute inset-0 h-full w-full object-cover opacity-45 transition duration-700 group-hover:scale-105"
-                        />
-
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#041f3d] via-[#063b73]/85 to-[#063b73]/20" />
-
-                        <div className="relative flex min-h-[360px] max-w-2xl flex-col justify-end p-7 md:min-h-[440px] md:p-10">
-                          <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#f4511e]">
-                            Category {String(activeIndex + 1).padStart(2, "0")}
-                          </span>
-
-                          <h2 className="mt-3 text-4xl font-bold tracking-tight text-white md:text-5xl">
-                            {activeProductCategory.title}
-                          </h2>
-
-                          <p className="mt-4 max-w-xl text-sm leading-7 text-blue-100/75 md:text-base">
-                            {activeProductCategory.summary}
-                          </p>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              openEnquiry(
-                                activeProductCategory.title,
-                              )
-                            }
-                            className="group mt-6 inline-flex w-fit items-center gap-2 rounded-full bg-[#f4511e] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#d94316] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                          >
-                            Enquire About This Category
-
-                            <ArrowUpRight
-                              size={17}
-                              aria-hidden="true"
-                              className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                            />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Category information */}
-                      <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                        <div>
-                          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#f4511e]">
-                            Product Category
-                          </p>
-
-                          <h3 className="mt-2 text-2xl font-bold text-[#063b73]">
-                            Explore {activeProductCategory.title}
-                          </h3>
-                        </div>
-
-                        <p className="text-sm text-slate-400">
-                          {activeProductCategory.eyebrow}
-                        </p>
-                      </div>
-
-{/* =================================================
-    PRODUCT GRID
-================================================== */}
-<div className="mt-8">
-  <div className="mb-5 flex items-end justify-between gap-4">
-    <div>
-      <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
-        Available Range
-      </p>
-
-      <h3 className="mt-1 text-xl font-bold text-[#063b73]">
-        {activeProductCategory.products.length > 0
-          ? `${activeProductCategory.products.length} product${activeProductCategory.products.length > 1 ? "s" : ""}`
-          : "Product range"}
-      </h3>
-    </div>
-
-    <span className="hidden text-xs text-slate-400 sm:block">
-      Enquire for pricing & availability
-    </span>
-  </div>
-
-  <ProductGrid
-    products={activeProductCategory.products}
-    categoryName={activeProductCategory.title}
-  />
-</div>
-
-                      {/* Catalogue notice */}
-                      <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-7">
-                        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                          <div>
-                            <p className="font-semibold text-[#063b73]">
-                              Looking for a specific product?
-                            </p>
-
-                            <p className="mt-1 text-sm leading-6 text-slate-500">
-                              Share your requirement and our team
-                              can help identify the appropriate
-                              product or product range.
-                            </p>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              openEnquiry(
-                                activeProductCategory.title,
-                              )
-                            }
-                            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#063b73] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#052f5b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4511e] focus-visible:ring-offset-2"
-                          >
-                            Send Requirement
-                            <ArrowUpRight
-                              size={16}
-                              aria-hidden="true"
-                            />
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
+                  {categoryNode && (
+                    <CategoryPanel
+                      key={categoryNode.category.id}
+                      node={categoryNode}
+                      index={activeIndex}
+                    />
                   )}
                 </AnimatePresence>
               </div>
@@ -584,6 +438,184 @@ function Products() {
         </section>
       </div>
     </>
+  );
+}
+
+function CategoryPanel({ node, index }: { node: CategoryNode; index: number }) {
+  const { openEnquiry } = useEnquiry();
+  const { category, children, products, breadcrumb } = node;
+  const isNested = breadcrumb.length > 1;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+    >
+      {/* Trail for subcategories */}
+      {isNested && (
+        <nav aria-label="Category trail" className="mb-5">
+          <ol className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-slate-500">
+            {breadcrumb.map((crumb, position) => (
+              <li key={crumb.path} className="flex items-center gap-1.5">
+                {position > 0 && <ChevronRight size={13} aria-hidden="true" />}
+                {position === breadcrumb.length - 1 ? (
+                  <span aria-current="page" className="text-[#063b73]">
+                    {crumb.title}
+                  </span>
+                ) : (
+                  <Link
+                    to={`/products/${crumb.path}`}
+                    state={{ keepScroll: true }}
+                    className="transition hover:text-[#063b73]"
+                  >
+                    {crumb.title}
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
+
+      {/* Category Hero */}
+      <div className="group relative mb-8 min-h-[360px] overflow-hidden rounded-3xl bg-[#063b73] md:min-h-[440px]">
+        <ContentImg
+          image={category.image}
+          fallbackAlt=""
+          sizes="(min-width: 1024px) 66vw, 100vw"
+          loading="eager"
+          className="absolute inset-0 h-full w-full object-cover opacity-45 transition duration-700 group-hover:scale-105"
+        />
+
+        <div className="absolute inset-0 bg-gradient-to-r from-[#041f3d] via-[#063b73]/85 to-[#063b73]/20" />
+
+        <div className="relative flex min-h-[360px] max-w-2xl flex-col justify-end p-7 md:min-h-[440px] md:p-10">
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#f4511e]">
+            {isNested
+              ? category.eyebrow || "Subcategory"
+              : `Category ${String(index + 1).padStart(2, "0")}`}
+          </span>
+
+          <h2 className="mt-3 text-4xl font-bold tracking-tight text-white md:text-5xl">
+            {category.title}
+          </h2>
+
+          {category.summary && (
+            <p className="mt-4 max-w-xl text-sm leading-7 text-blue-100/75 md:text-base">
+              {category.summary}
+            </p>
+          )}
+
+          <button
+            type="button"
+            onClick={() => openEnquiry(category.title)}
+            className="group mt-6 inline-flex w-fit items-center gap-2 rounded-full bg-[#f4511e] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#d94316] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          >
+            Enquire About This Category
+
+            <ArrowUpRight
+              size={17}
+              aria-hidden="true"
+              className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            />
+          </button>
+        </div>
+      </div>
+
+      {/* Subcategories */}
+      {children.length > 0 && (
+        <div className="mb-10">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+            Subcategories
+          </p>
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {children.map((child) => (
+              <Link
+                key={child.id}
+                to={`/products/${child.path}`}
+                state={{ keepScroll: true }}
+                className="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#0b5fa5]/30 hover:shadow-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f4511e]/30"
+              >
+                <span className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[#f5f8fc]">
+                  <ContentImg
+                    image={child.image}
+                    fallbackAlt=""
+                    sizes="64px"
+                    className="h-full w-full object-cover"
+                  />
+                </span>
+
+                <span className="min-w-0 flex-1">
+                  <span className="block font-bold text-[#063b73]">{child.title}</span>
+                  <span className="mt-1 block text-xs text-slate-500">
+                    {child.productCount} {child.productCount === 1 ? "product" : "products"}
+                  </span>
+                </span>
+
+                <ArrowUpRight
+                  size={17}
+                  aria-hidden="true"
+                  className="shrink-0 text-slate-300 transition group-hover:text-[#f4511e]"
+                />
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Product grid */}
+      {(products.length > 0 || children.length === 0) && (
+        <div className="mt-8">
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+                Available Range
+              </p>
+
+              <h3 className="mt-1 text-xl font-bold text-[#063b73]">
+                {products.length > 0
+                  ? `${products.length} product${products.length > 1 ? "s" : ""}`
+                  : "Product range"}
+              </h3>
+            </div>
+
+            <span className="hidden text-xs text-slate-400 sm:block">
+              Enquire for pricing & availability
+            </span>
+          </div>
+
+          <ProductGrid products={products} categoryName={category.title} />
+        </div>
+      )}
+
+      {/* Catalogue notice */}
+      <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-7">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-semibold text-[#063b73]">
+              Looking for a specific product?
+            </p>
+
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              Share your requirement and our team can help identify the
+              appropriate product or product range.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => openEnquiry(category.title)}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#063b73] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#052f5b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4511e] focus-visible:ring-offset-2"
+          >
+            Send Requirement
+            <ArrowUpRight size={16} aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 

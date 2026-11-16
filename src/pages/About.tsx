@@ -14,7 +14,7 @@ import { Link } from "react-router";
 import { publicAsset } from "../lib/publicAsset";
 import { usePageMeta } from "../lib/usePageMeta";
 import { useEnquiry } from "../hooks/useEnquiry";
-import { useCategories, useIndustries } from "../lib/content/hooks";
+import { useIndustries, useTree } from "../lib/content/hooks";
 
 const strengths = [
   {
@@ -51,7 +51,7 @@ function About() {
 
   const reduceMotion = useReducedMotion();
   const { openEnquiry } = useEnquiry();
-  const categoriesResult = useCategories();
+  const categoriesResult = useTree();
   const industriesResult = useIndustries();
   const categories =
     categoriesResult.status === "ready" ? categoriesResult.data : [];
@@ -391,7 +391,7 @@ function About() {
             {categories.map((category, index) => (
               <Link
                 key={category.id}
-                to={`/products/${category.slug}`}
+                to={`/products/${category.path}`}
                 className="flex items-center gap-3 rounded-xl border border-slate-200 p-4 transition hover:border-orange-300 hover:bg-orange-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
               >
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-xs font-bold text-orange-700">

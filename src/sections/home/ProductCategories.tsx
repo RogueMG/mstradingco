@@ -3,7 +3,7 @@ import { motion, type Variants } from "motion/react";
 import { Link } from "react-router";
 
 import CategoryCard from "../../components/products/CategoryCard";
-import { useCategories } from "../../lib/content/hooks";
+import { useTree } from "../../lib/content/hooks";
 
 const containerVariants: Variants = {
   hidden: {},
@@ -15,7 +15,7 @@ const containerVariants: Variants = {
 };
 
 function ProductCategories() {
-  const categories = useCategories();
+  const categories = useTree();
   const homeCategories =
     categories.status === "ready"
       ? categories.data.filter((category) => category.showOnHome)

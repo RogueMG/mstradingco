@@ -1,10 +1,16 @@
 import { useCallback, useSyncExternalStore } from "react";
 
+import { apiSource } from "./api";
 import { localSource } from "./local";
 import { invalidate, read, subscribe, type ContentResult } from "./store";
-import type { Brand, Category, Industry, Product } from "./types";
+import type { Brand, CatalogueNode, Industry, TreeCategory } from "./types";
 
-const source = localSource;
+/*
+ * Content comes from the Pages Functions API. Plain `npm run dev` (Vite only,
+ * no Functions) sets VITE_CONTENT_SOURCE=local in .env.development and renders
+ * the starter catalogue instead.
+ */
+const source = import.meta.env.VITE_CONTENT_SOURCE === "local" ? localSource : apiSource;
 
 function useContent<T>(
   key: string,
@@ -19,14 +25,14 @@ function useContent<T>(
   return { ...result, retry };
 }
 
-export function useCategories() {
-  return useContent<Category[]>("categories", () => source.categories());
+/** The whole category tree with product titles and paths. */
+export function useTree() {
+  return useContent<TreeCategory[]>("tree", () => source.tree());
 }
 
-export function useProduct(category: string, slug: string) {
-  return useContent<Product | null>(`product:${category}/${slug}`, () =>
-    source.product(category, slug),
-  );
+/** A category or product by its path under /products ("" resolves to null). */
+export function useNode(path: string) {
+  return useContent<CatalogueNode | null>(`node:${path}`, () => (path ? source.node(path) : null));
 }
 
 export function useBrands() {

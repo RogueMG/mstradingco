@@ -1,16 +1,16 @@
 import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
 import { Link } from "react-router";
 
-import { useCategories } from "../../lib/content/hooks";
+import { useTree } from "../../lib/content/hooks";
 import { publicAsset } from "../../lib/publicAsset";
 
 function Footer() {
-  const categories = useCategories();
+  const categories = useTree();
   const productLinks =
     categories.status === "ready"
       ? categories.data.map((category) => ({
           label: category.title,
-          href: `/products/${category.slug}`,
+          href: `/products/${category.path}`,
         }))
       : [];
 

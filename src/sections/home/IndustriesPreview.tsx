@@ -17,7 +17,7 @@ function IndustriesPreview() {
     result.status === "ready"
       ? result.data.filter((industry) => industry.showOnHome)
       : [];
-  const [activeId, setActiveId] = useState("");
+  const [activeId, setActiveId] = useState<number | null>(null);
 
   const activeIndustry =
     industries.find((industry) => industry.id === activeId) ??

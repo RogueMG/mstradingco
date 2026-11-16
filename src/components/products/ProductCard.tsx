@@ -12,7 +12,7 @@ interface ProductCardProps {
 
 function ProductCard({ product }: ProductCardProps) {
   const { openEnquiry } = useEnquiry();
-  const href = `/products/${product.category.slug}/${product.slug}`;
+  const href = `/products/${product.path}`;
 
   return (
     <motion.article

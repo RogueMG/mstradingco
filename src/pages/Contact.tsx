@@ -15,7 +15,8 @@ import {
 import { publicAsset } from "../lib/publicAsset";
 import { usePageMeta } from "../lib/usePageMeta";
 import { emailLink, enquiryMessage, whatsappLink } from "../data/company";
-import { useCategories } from "../lib/content/hooks";
+import { useIndustries, useTree } from "../lib/content/hooks";
+import { flattenTree } from "../lib/content/tree";
 
 const BUSINESS_EMAIL = "mstrading52@yahoo.com";
 const PRIMARY_PHONE = "+918939575200";
@@ -78,11 +79,17 @@ function Contact() {
   const [form, setForm] = useState<ContactForm>(initialForm);
   const [errors, setErrors] = useState<Partial<Record<keyof ContactForm, string>>>({});
   const [prepared, setPrepared] = useState<"whatsapp" | "email" | null>(null);
-  const categoriesResult = useCategories();
-  const categoryOptions =
-    categoriesResult.status === "ready"
-      ? categoriesResult.data.map((category) => category.title)
+  const treeResult = useTree();
+  const industriesResult = useIndustries();
+  const interestGroups =
+    treeResult.status === "ready"
+      ? flattenTree(treeResult.data).map(({ category, depth }) => ({
+          label: `${"– ".repeat(depth)}${category.title}`,
+          options: [category.title, ...category.products.map((product) => product.title)],
+        }))
       : [];
+  const industryOptions =
+    industriesResult.status === "ready" ? industriesResult.data.map((industry) => industry.title) : [];
 
   const updateField = (field: keyof ContactForm, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -414,11 +421,24 @@ function Contact() {
                     required
                   >
                     <option value="">Select a requirement</option>
-                    {categoryOptions.map((title) => (
-                      <option key={title} value={title}>
-                        {title}
-                      </option>
+                    {interestGroups.map((group) => (
+                      <optgroup key={group.label} label={group.label}>
+                        {group.options.map((title, index) => (
+                          <option key={`${group.label}-${title}`} value={title}>
+                            {index === 0 ? `All ${title}` : title}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
+                    {industryOptions.length > 0 && (
+                      <optgroup label="Industry">
+                        {industryOptions.map((title) => (
+                          <option key={`industry-${title}`} value={`Industry: ${title}`}>
+                            {title}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
                     <option value="Bulk or project supply">Bulk or project supply</option>
                     <option value="Other requirement">Other requirement</option>
                   </select>

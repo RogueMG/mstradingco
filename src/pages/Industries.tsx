@@ -37,7 +37,7 @@ function Industries() {
   const result = useIndustries();
   const industries = result.status === "ready" ? result.data : [];
 
-  const [activeIndustry, setActiveIndustry] = useState("");
+  const [activeIndustry, setActiveIndustry] = useState<number | null>(null);
 
   const active =
     industries.find((industry) => industry.id === activeIndustry) ??
@@ -46,7 +46,7 @@ function Industries() {
     Math.max(industries.indexOf(active), 0) + 1,
   ).padStart(2, "0");
 
-  const handleIndustryChange = (id: string) => {
+  const handleIndustryChange = (id: number) => {
     setActiveIndustry(id);
   };
 

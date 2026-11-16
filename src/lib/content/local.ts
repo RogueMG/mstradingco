@@ -8,102 +8,122 @@ import {
 import { publicAsset } from "../publicAsset";
 import type {
   Brand,
-  Category,
+  CatalogueNode,
+  CategorySummary,
   ContentImage,
   Industry,
-  Product,
   ProductCard,
+  TreeCategory,
 } from "./types";
 
-// Builds the same shapes as the content API from the local starter catalogue.
+/*
+ * Builds the same shapes as the content API from the local starter catalogue.
+ * Used by `npm run dev` (no Functions running); the starter data is flat, so
+ * every category is top-level.
+ */
 
 function image(path: string, alt: string): ContentImage {
   return { src: publicAsset(path), alt };
 }
 
-function toCard(product: StarterProduct): ProductCard {
-  const category = starterCategories.find(
-    (item) => item.slug === product.category,
-  );
-  const brand = starterBrands.find((item) => item.slug === product.brand);
-
-  return {
-    id: `product-${product.slug}`,
-    title: product.title,
-    slug: product.slug,
-    summary: product.summary,
-    image: category ? image(category.image, product.title) : null,
-    brand: brand ? { name: brand.name, slug: brand.slug } : null,
-    category: {
-      title: category?.title ?? "",
-      slug: product.category,
-    },
-    isSample: true,
-  };
-}
-
-function categoryBase(slug: string) {
-  const index = starterCategories.findIndex((item) => item.slug === slug);
-  const category = starterCategories[index];
-
-  return {
-    id: `category-${category.slug}`,
-    title: category.title,
-    slug: category.slug,
-    eyebrow: category.eyebrow,
-    summary: category.summary,
-    image: image(category.image, `${category.title} products`),
-    showOnHome: true,
-    order: (index + 1) * 10,
-  };
-}
+const categoryId = (slug: string) => starterCategories.findIndex((item) => item.slug === slug) + 1;
+const productId = (product: StarterProduct) => starterProducts.indexOf(product) + 1;
 
 function productsIn(category: string) {
   return starterProducts.filter((product) => product.category === category);
 }
 
+function toCard(product: StarterProduct): ProductCard {
+  const category = starterCategories.find((item) => item.slug === product.category);
+  const brand = starterBrands.find((item) => item.slug === product.brand);
+
+  return {
+    id: productId(product),
+    title: product.title,
+    slug: product.slug,
+    path: `${product.category}/${product.slug}`,
+    summary: product.summary,
+    image: category ? image(category.image, product.title) : null,
+    brand: brand ? { name: brand.name, slug: brand.slug } : null,
+    category: { title: category?.title ?? "", path: product.category },
+    isSample: true,
+  };
+}
+
+function summary(slug: string): CategorySummary {
+  const category = starterCategories.find((item) => item.slug === slug)!;
+
+  return {
+    id: categoryId(slug),
+    slug,
+    path: slug,
+    title: category.title,
+    eyebrow: category.eyebrow,
+    summary: category.summary,
+    image: image(category.image, `${category.title} products`),
+    productCount: productsIn(slug).length,
+  };
+}
+
 export const localSource = {
-  categories: (): Category[] =>
-    starterCategories.map((category) => ({
-      ...categoryBase(category.slug),
-      products: productsIn(category.slug).map(toCard),
+  tree: (): TreeCategory[] =>
+    starterCategories.map((category, index) => ({
+      ...summary(category.slug),
+      showOnHome: true,
+      order: (index + 1) * 10,
+      children: [],
+      products: productsIn(category.slug).map((product) => ({
+        title: product.title,
+        slug: product.slug,
+        path: `${category.slug}/${product.slug}`,
+      })),
     })),
 
-  category: (slug: string): Category | null => {
-    if (!starterCategories.some((item) => item.slug === slug)) return null;
+  node: (path: string): CatalogueNode | null => {
+    const [categorySlug, productSlug, ...rest] = path.split("/").filter(Boolean);
+    const category = starterCategories.find((item) => item.slug === categorySlug);
 
-    return {
-      ...categoryBase(slug),
-      products: productsIn(slug).map(toCard),
-    };
-  },
+    if (!category || rest.length > 0) return null;
 
-  product: (category: string, slug: string): Product | null => {
-    const product = starterProducts.find(
-      (item) => item.slug === slug && item.category === category,
-    );
+    const breadcrumb = [{ title: category.title, path: category.slug }];
 
+    if (!productSlug) {
+      return {
+        kind: "category",
+        category: summary(category.slug),
+        children: [],
+        products: productsIn(category.slug).map(toCard),
+        breadcrumb,
+      };
+    }
+
+    const product = productsIn(category.slug).find((item) => item.slug === productSlug);
     if (!product) return null;
 
     const card = toCard(product);
 
     return {
-      ...card,
-      images: card.image ? [card.image] : [],
-      keyFeatures: [],
-      description: "",
-      specifications: [],
-      variants: [],
-      related: productsIn(category)
-        .filter((item) => item.slug !== slug)
-        .slice(0, 3)
-        .map(toCard),
+      kind: "product",
+      breadcrumb,
+      product: {
+        ...card,
+        images: card.image ? [card.image] : [],
+        keyFeatures: [],
+        description: "",
+        specifications: [],
+        variants: [],
+        related: productsIn(category.slug)
+          .filter((item) => item.slug !== productSlug)
+          .slice(0, 3)
+          .map(toCard),
+        updatedAt: "",
+      },
     };
   },
 
   brands: (): Brand[] =>
     starterBrands.map((brand, index) => ({
-      id: `brand-${brand.slug}`,
+      id: index + 1,
       name: brand.name,
       slug: brand.slug,
       tagline: brand.tagline,
@@ -116,7 +136,7 @@ export const localSource = {
 
   industries: (): Industry[] =>
     starterIndustries.map((industry, index) => ({
-      id: `industry-${industry.slug}`,
+      id: index + 1,
       title: industry.title,
       slug: industry.slug,
       label: industry.label,

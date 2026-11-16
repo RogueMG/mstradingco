@@ -7,15 +7,16 @@ import {
   Phone,
 } from "lucide-react";
 import { useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link } from "react-router";
 
 import ProductCard from "../components/products/ProductCard";
 import ContentImg from "../components/ui/ContentImg";
 import ContentState from "../components/ui/ContentState";
 import PageLoading from "../components/ui/PageLoading";
-import { company, emailLink, whatsappLink } from "../data/company";
-import { useProduct } from "../lib/content/hooks";
-import type { ContentImage, Product } from "../lib/content/types";
+import { company, whatsappLink } from "../data/company";
+import { useEnquiry } from "../hooks/useEnquiry";
+import { useNode } from "../lib/content/hooks";
+import type { ContentImage, Crumb, Product } from "../lib/content/types";
 import { usePageMeta } from "../lib/usePageMeta";
 
 function Gallery({ images, title }: { images: ContentImage[]; title: string }) {
@@ -64,7 +65,8 @@ function Gallery({ images, title }: { images: ContentImage[]; title: string }) {
   );
 }
 
-function ProductDetails({ product }: { product: Product }) {
+function ProductDetails({ product, breadcrumb }: { product: Product; breadcrumb: Crumb[] }) {
+  const { openEnquiry } = useEnquiry();
   const subject = product.brand
     ? `${product.title} (${product.brand.name})`
     : product.title;
@@ -92,15 +94,17 @@ function ProductDetails({ product }: { product: Product }) {
                   Products
                 </Link>
               </li>
-              <li className="flex items-center gap-1.5">
-                <ChevronRight size={13} aria-hidden="true" />
-                <Link
-                  to={`/products/${product.category.slug}`}
-                  className="transition hover:text-[#063b73]"
-                >
-                  {product.category.title}
-                </Link>
-              </li>
+              {breadcrumb.map((crumb) => (
+                <li key={crumb.path} className="flex items-center gap-1.5">
+                  <ChevronRight size={13} aria-hidden="true" />
+                  <Link
+                    to={`/products/${crumb.path}`}
+                    className="transition hover:text-[#063b73]"
+                  >
+                    {crumb.title}
+                  </Link>
+                </li>
+              ))}
               <li className="flex min-w-0 items-center gap-1.5">
                 <ChevronRight size={13} aria-hidden="true" />
                 <span aria-current="page" className="truncate text-[#063b73]">
@@ -116,7 +120,7 @@ function ProductDetails({ product }: { product: Product }) {
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
                 <Link
-                  to={`/products/${product.category.slug}`}
+                  to={`/products/${product.category.path}`}
                   className="text-xs font-bold uppercase tracking-[0.22em] text-[#f4511e] hover:underline"
                 >
                   {product.category.title}
@@ -167,22 +171,23 @@ function ProductDetails({ product }: { product: Product }) {
 
               {/* Enquiry */}
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => openEnquiry(product.category.title, product.title)}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#f4511e] px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-orange-500/15 transition-all hover:-translate-y-0.5 hover:bg-[#d94316] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f4511e]/30"
+                >
+                  <Mail size={17} aria-hidden="true" />
+                  Enquire about this product
+                </button>
+
                 <a
                   href={whatsappLink(message)}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#f4511e] px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-orange-500/15 transition-all hover:-translate-y-0.5 hover:bg-[#d94316] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f4511e]/30"
-                >
-                  <MessageCircle size={17} aria-hidden="true" />
-                  Enquire on WhatsApp
-                </a>
-
-                <a
-                  href={emailLink(`Quote request: ${subject}`, message)}
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-[#063b73]/20 px-6 py-3.5 text-sm font-bold text-[#063b73] transition-all hover:border-[#063b73] hover:bg-[#063b73] hover:text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f4511e]/30"
                 >
-                  <Mail size={17} aria-hidden="true" />
-                  Enquire by email
+                  <MessageCircle size={17} aria-hidden="true" />
+                  Ask on WhatsApp
                 </a>
               </div>
 
@@ -280,7 +285,7 @@ function ProductDetails({ product }: { product: Product }) {
                 More in {product.category.title}
               </h2>
               <Link
-                to={`/products/${product.category.slug}`}
+                to={`/products/${product.category.path}`}
                 className="text-sm font-bold text-[#063b73] hover:text-[#f4511e]"
               >
                 View all
@@ -299,10 +304,11 @@ function ProductDetails({ product }: { product: Product }) {
   );
 }
 
-function ProductPage() {
-  const { category = "", product: slug = "" } = useParams();
-  const product = useProduct(category, slug);
-  const data = product.status === "ready" ? product.data : null;
+function ProductPage({ path }: { path: string }) {
+  const product = useNode(path);
+  const node = product.status === "ready" && product.data?.kind === "product" ? product.data : null;
+  const data = node?.product ?? null;
+  const parentPath = path.split("/").slice(0, -1).join("/");
 
   usePageMeta(
     data ? data.title : product.status === "ready" ? "Product not found" : undefined,
@@ -322,7 +328,7 @@ function ProductPage() {
           title="We couldn't load this product"
           message="Please check your connection and try again."
           onRetry={product.retry}
-          backHref={`/products/${category}`}
+          backHref={`/products/${parentPath}`}
           backLabel="Back to category"
         />
       </section>
@@ -344,7 +350,7 @@ function ProductPage() {
     );
   }
 
-  return <ProductDetails key={data.id} product={data} />;
+  return <ProductDetails key={data.id} product={data} breadcrumb={node?.breadcrumb ?? []} />;
 }
 
 export default ProductPage;
