@@ -43,3 +43,43 @@ a {
   background: var(--ms-orange);
   color: white;
 }
+/* Product descriptions (sanitised HTML from the admin editor) */
+.rich-text > * + * {
+  margin-top: 1rem;
+}
+
+.rich-text p,
+.rich-text ul {
+  font-size: 1rem;
+  line-height: 1.75rem;
+  color: #475569;
+}
+
+.rich-text h3 {
+  margin-top: 2rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ms-navy);
+}
+
+.rich-text h3:first-child {
+  margin-top: 0;
+}
+
+.rich-text ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+
+.rich-text li + li {
+  margin-top: 0.5rem;
+}
+
+.rich-text li::marker {
+  color: var(--ms-orange);
+}
+
+.rich-text strong {
+  font-weight: 600;
+  color: var(--ms-text);
+}

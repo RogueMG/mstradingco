@@ -1,9 +1,13 @@
-import type { PortableTextBlock } from "@portabletext/react";
-
-/** An image the site can render. `src` is null when an image has no upload or link. */
+/**
+ * An image the site can render. `src` is null when an image has no upload or link.
+ * Uploaded images also have a small `thumb` variant and their pixel size.
+ */
 export interface ContentImage {
   src: string | null;
   alt: string;
+  thumb?: string | null;
+  width?: number | null;
+  height?: number | null;
 }
 
 export interface LinkRef {
@@ -51,7 +55,8 @@ export interface Specification {
 export interface Product extends ProductCard {
   images: ContentImage[];
   keyFeatures: string[];
-  description: PortableTextBlock[];
+  /** Sanitised HTML: p, h3, ul/li, strong, em, br. */
+  description: string;
   specifications: Specification[];
   variants: string[];
   related: ProductCard[];

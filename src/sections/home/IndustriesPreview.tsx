@@ -27,7 +27,7 @@ function IndustriesPreview() {
 
   const activeNumber = String(industries.indexOf(activeIndustry) + 1).padStart(2, "0");
   const total = String(industries.length).padStart(2, "0");
-  const activeImage = imageSources(activeIndustry.image, 1280);
+  const activeImage = imageSources(activeIndustry.image);
 
   return (
     <section className="relative overflow-hidden bg-[#063b73] py-24 text-white md:py-32">

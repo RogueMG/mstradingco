@@ -105,7 +105,7 @@ function BrandsPreview() {
         >
           {brands.map((brand, index) => {
             const isPending = !brand.confirmed;
-            const logo = imageSources(brand.logo, 240, [240, 480]);
+            const logo = imageSources(brand.logo);
 
             return (
               <motion.article

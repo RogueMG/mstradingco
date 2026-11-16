@@ -1,26 +1,21 @@
 import type { ContentImage } from "./types";
 
-const DEFAULT_WIDTHS = [320, 640, 960, 1280, 1600];
-
 /**
- * Builds <img> sources for a content image. Sanity CDN uploads get resized,
- * format-negotiated variants and a srcset; linked and local images are used as-is.
+ * Builds <img> sources for a content image. Uploaded images come with a small
+ * thumbnail, which becomes a srcset alongside the full-size WebP. Linked and
+ * local images are used as-is (no server-side resizing, to keep Functions light).
  */
 export function imageSources(
   image: ContentImage | null | undefined,
-  width = 960,
-  widths: number[] = DEFAULT_WIDTHS,
 ): { src: string; srcSet?: string } | null {
   if (!image?.src) return null;
 
-  if (!image.src.startsWith("https://cdn.sanity.io/")) {
-    return { src: image.src };
+  if (image.thumb && image.width) {
+    return {
+      src: image.src,
+      srcSet: `${image.thumb} 400w, ${image.src} ${image.width}w`,
+    };
   }
 
-  const sized = (w: number) => `${image.src}?w=${w}&fit=max&auto=format`;
-
-  return {
-    src: sized(width),
-    srcSet: widths.map((w) => `${sized(w)} ${w}w`).join(", "),
-  };
+  return { src: image.src };
 }

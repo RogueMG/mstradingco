@@ -458,7 +458,6 @@ function Products() {
                           image={activeProductCategory.image}
                           fallbackAlt=""
                           sizes="(min-width: 1024px) 66vw, 100vw"
-                          width={1280}
                           loading="eager"
                           className="absolute inset-0 h-full w-full object-cover opacity-45 transition duration-700 group-hover:scale-105"
                         />

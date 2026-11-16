@@ -41,7 +41,6 @@ function CategoryCard({ category, index }: CategoryCardProps) {
         image={category.image}
         fallbackAlt={`${category.title} products`}
         sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-        width={640}
         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
       />
 

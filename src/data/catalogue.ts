@@ -1,6 +1,6 @@
 /**
- * Starter catalogue. The site renders this when no Sanity projectId is set,
- * and scripts/build-seed.ts turns it into sanity/seed.ndjson.
+ * Starter catalogue. It seeds the D1 database (scripts/build-seed-sql.ts) and is
+ * what the site renders when run with plain `npm run dev` (no Functions).
  *
  * Keep this file free of imports so Node can run it directly.
  * Image paths are relative to /public.

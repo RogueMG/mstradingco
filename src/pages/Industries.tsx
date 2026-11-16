@@ -339,7 +339,6 @@ function Industries() {
                           image={active.image}
                           fallbackAlt={active.title}
                           sizes="(min-width: 1024px) 60vw, 100vw"
-                          width={1280}
                           loading="eager"
                           className="h-full w-full object-cover"
                         />

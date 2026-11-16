@@ -33,7 +33,6 @@ function ProductCard({ product }: ProductCardProps) {
         <ContentImg
           image={product.image}
           fallbackAlt={product.title}
-          width={640}
           className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
         />
 

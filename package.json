@@ -5,15 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && node scripts/spa-fallback.mjs",
+    "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "seed:build": "node scripts/build-seed.ts",
-    "test:queries": "node scripts/test-queries.ts",
-    "studio": "npm run dev --prefix studio"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@portabletext/react": "^8.0.1",
     "@tailwindcss/vite": "^4.3.3",
     "lucide-react": "^1.45.0",
     "motion": "^13.2.0",

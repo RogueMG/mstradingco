@@ -1,4 +1,3 @@
-import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import {
   CheckCircle2,
   ChevronRight,
@@ -19,34 +18,6 @@ import { useProduct } from "../lib/content/hooks";
 import type { ContentImage, Product } from "../lib/content/types";
 import { usePageMeta } from "../lib/usePageMeta";
 
-const descriptionComponents: PortableTextComponents = {
-  block: {
-    normal: ({ children }) => (
-      <p className="mt-4 text-base leading-7 text-slate-600 first:mt-0">
-        {children}
-      </p>
-    ),
-    h3: ({ children }) => (
-      <h3 className="mt-8 text-xl font-bold text-[#063b73] first:mt-0">
-        {children}
-      </h3>
-    ),
-  },
-  list: {
-    bullet: ({ children }) => (
-      <ul className="mt-4 list-disc space-y-2 pl-5 text-base leading-7 text-slate-600 marker:text-[#f4511e]">
-        {children}
-      </ul>
-    ),
-  },
-  marks: {
-    strong: ({ children }) => (
-      <strong className="font-semibold text-[#0b1f33]">{children}</strong>
-    ),
-    em: ({ children }) => <em>{children}</em>,
-  },
-};
-
 function Gallery({ images, title }: { images: ContentImage[]; title: string }) {
   const [active, setActive] = useState(0);
   const current = images[active] ?? images[0] ?? null;
@@ -59,7 +30,6 @@ function Gallery({ images, title }: { images: ContentImage[]; title: string }) {
           image={current}
           fallbackAlt={title}
           sizes="(min-width: 1024px) 50vw, 100vw"
-          width={1280}
           loading="eager"
           className="h-full w-full object-cover"
         />
@@ -84,7 +54,6 @@ function Gallery({ images, title }: { images: ContentImage[]; title: string }) {
                 image={image}
                 fallbackAlt=""
                 sizes="120px"
-                width={240}
                 className="h-full w-full object-cover"
               />
             </button>
@@ -102,7 +71,7 @@ function ProductDetails({ product }: { product: Product }) {
   const message = `Hello ${company.name}, I'd like a quote for ${subject}.`;
   const hasDetails =
     product.keyFeatures.length > 0 ||
-    product.description.length > 0 ||
+    product.description.trim() !== "" ||
     product.specifications.length > 0;
 
   return (
@@ -256,17 +225,16 @@ function ProductDetails({ product }: { product: Product }) {
                 </div>
               )}
 
-              {product.description.length > 0 && (
+              {product.description.trim() !== "" && (
                 <div>
                   <h2 className="text-2xl font-bold tracking-tight text-[#063b73]">
                     Description
                   </h2>
-                  <div className="mt-6">
-                    <PortableText
-                      value={product.description}
-                      components={descriptionComponents}
-                    />
-                  </div>
+                  {/* Sanitised server-side to p, h3, ul/li, strong, em and br. */}
+                  <div
+                    className="rich-text mt-6"
+                    dangerouslySetInnerHTML={{ __html: product.description }}
+                  />
                 </div>
               )}
             </div>

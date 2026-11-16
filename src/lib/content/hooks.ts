@@ -1,12 +1,10 @@
 import { useCallback, useSyncExternalStore } from "react";
 
-import { cmsEnabled } from "./config";
 import { localSource } from "./local";
-import { sanitySource } from "./sanity";
 import { invalidate, read, subscribe, type ContentResult } from "./store";
 import type { Brand, Category, Industry, Product } from "./types";
 
-const source = cmsEnabled ? sanitySource : localSource;
+const source = localSource;
 
 function useContent<T>(
   key: string,

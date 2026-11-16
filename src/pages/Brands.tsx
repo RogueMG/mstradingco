@@ -186,7 +186,7 @@ function Brands() {
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {confirmedBrands.map((brand, index) => {
-                const logo = imageSources(brand.logo, 300, [300, 600]);
+                const logo = imageSources(brand.logo);
 
                 return (
                 <motion.article

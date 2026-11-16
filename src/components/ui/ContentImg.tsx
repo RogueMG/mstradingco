@@ -8,7 +8,6 @@ interface ContentImgProps {
   image: ContentImage | null | undefined;
   fallbackAlt: string;
   sizes?: string;
-  width?: number;
   className?: string;
   loading?: "lazy" | "eager";
 }
@@ -18,12 +17,11 @@ function ContentImg({
   image,
   fallbackAlt,
   sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
-  width,
   className = "",
   loading = "lazy",
 }: ContentImgProps) {
   const [failed, setFailed] = useState(false);
-  const sources = imageSources(image, width);
+  const sources = imageSources(image);
 
   if (!sources || failed) {
     return (
@@ -43,6 +41,8 @@ function ContentImg({
       srcSet={sources.srcSet}
       sizes={sources.srcSet ? sizes : undefined}
       alt={image?.alt || fallbackAlt}
+      width={image?.width ?? undefined}
+      height={image?.height ?? undefined}
       loading={loading}
       decoding="async"
       onError={() => setFailed(true)}

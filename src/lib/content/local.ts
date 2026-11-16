@@ -15,7 +15,7 @@ import type {
   ProductCard,
 } from "./types";
 
-// Builds the same shapes as the Sanity queries from the local starter catalogue.
+// Builds the same shapes as the content API from the local starter catalogue.
 
 function image(path: string, alt: string): ContentImage {
   return { src: publicAsset(path), alt };
@@ -91,7 +91,7 @@ export const localSource = {
       ...card,
       images: card.image ? [card.image] : [],
       keyFeatures: [],
-      description: [],
+      description: "",
       specifications: [],
       variants: [],
       related: productsIn(category)
