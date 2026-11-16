@@ -1,10 +1,51 @@
+import {
+  defaultSiteSettings,
+  formatAddress,
+  type SiteSettings,
+} from "../../shared/site";
+
+interface SiteData {
+  site: SiteSettings;
+  turnstileSiteKey: string;
+}
+
+/**
+ * Site-wide facts are edited in Admin → Settings. The page middleware embeds
+ * the current values in every page as <script id="site-data">; plain
+ * `npm run dev` (no Functions) falls back to the defaults in shared/site.ts.
+ */
+function readSiteData(): SiteData {
+  try {
+    const element = document.getElementById("site-data");
+    if (element?.textContent) {
+      const data = JSON.parse(element.textContent) as Partial<SiteData>;
+      return {
+        site: { ...defaultSiteSettings, ...data.site },
+        turnstileSiteKey: data.turnstileSiteKey ?? "",
+      };
+    }
+  } catch {
+    // Fall through to the defaults.
+  }
+
+  return { site: defaultSiteSettings, turnstileSiteKey: "" };
+}
+
+export const siteData = readSiteData();
+export const site = siteData.site;
+
+const primaryLocation = site.locations[0];
+
 export const company = {
-  name: "MS Trading Co.",
-  phone: "+91 89395 75200",
-  phoneHref: "tel:+918939575200",
-  landline: "044 4512 2249",
-  email: "mstrading52@yahoo.com",
-  whatsappNumber: "918939575200",
+  name: site.name,
+  phone: site.phone,
+  phoneHref: `tel:${site.phone.replace(/[^\d+]/g, "")}`,
+  landline: site.landline,
+  landlineHref: `tel:${site.landline.replace(/[^\d+]/g, "")}`,
+  email: site.email,
+  whatsappNumber: site.whatsappNumber,
+  gstin: site.gstin,
+  address: primaryLocation ? formatAddress(primaryLocation) : "",
 };
 
 /** WhatsApp click-to-chat link with a pre-filled message. */
@@ -17,7 +58,7 @@ export interface EnquiryDetails {
   company?: string;
   phone?: string;
   email?: string;
-  requirement: string;
+  interest?: string;
   message?: string;
 }
 
@@ -26,7 +67,7 @@ export function enquiryMessage(details: EnquiryDetails) {
   return [
     `Hello ${company.name}, I'd like a quote.`,
     "",
-    `Requirement: ${details.requirement}`,
+    details.interest ? `Interested in: ${details.interest}` : "",
     details.message ? `Details: ${details.message}` : "",
     "",
     `Name: ${details.name}`,

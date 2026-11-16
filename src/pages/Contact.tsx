@@ -14,23 +14,28 @@ import {
 } from "lucide-react";
 import { publicAsset } from "../lib/publicAsset";
 import { usePageMeta } from "../lib/usePageMeta";
-import { emailLink, enquiryMessage, whatsappLink } from "../data/company";
-import { useIndustries, useTree } from "../lib/content/hooks";
-import { flattenTree } from "../lib/content/tree";
+import LocationMap from "../components/common/LocationMap";
+import Turnstile from "../components/common/Turnstile";
+import { company, enquiryMessage, site, whatsappLink } from "../data/company";
+import { useInterestOptions } from "../hooks/useInterestOptions";
+import { submitEnquiry } from "../lib/enquiries";
+import { formatAddress } from "../../shared/site";
 
-const BUSINESS_EMAIL = "mstrading52@yahoo.com";
-const PRIMARY_PHONE = "+918939575200";
-const DISPLAY_PHONE = "+91 89395 75200";
-const OFFICE_PHONE = "044 4512 2249";
-const WHATSAPP_LINK = `https://wa.me/${PRIMARY_PHONE.replace("+", "")}`;
+// Site-wide facts come from Admin → Settings (see src/data/company.ts).
+const BUSINESS_EMAIL = company.email;
+const PRIMARY_PHONE = company.phoneHref.replace("tel:", "");
+const DISPLAY_PHONE = company.phone;
+const OFFICE_PHONE = company.landline;
+const WHATSAPP_LINK = `https://wa.me/${company.whatsappNumber}`;
 
 type ContactForm = {
   name: string;
   company: string;
   phone: string;
   email: string;
-  requirement: string;
+  interest: string;
   message: string;
+  website: string;
 };
 
 const initialForm: ContactForm = {
@@ -38,8 +43,9 @@ const initialForm: ContactForm = {
   company: "",
   phone: "",
   email: "",
-  requirement: "",
+  interest: "",
   message: "",
+  website: "",
 };
 
 const contactMethods = [
@@ -72,24 +78,17 @@ const contactMethods = [
 function Contact() {
   usePageMeta(
     "Contact Us",
-    "Contact MS Trading Co., Linghi Chetty Street, Chennai. Call +91 89395 75200 or send your requirement on WhatsApp or email.",
+    `Contact ${company.name}, ${company.address}. Call ${company.phone} or send your requirement online or on WhatsApp.`,
   );
 
   const reduceMotion = useReducedMotion();
   const [form, setForm] = useState<ContactForm>(initialForm);
   const [errors, setErrors] = useState<Partial<Record<keyof ContactForm, string>>>({});
-  const [prepared, setPrepared] = useState<"whatsapp" | "email" | null>(null);
-  const treeResult = useTree();
-  const industriesResult = useIndustries();
-  const interestGroups =
-    treeResult.status === "ready"
-      ? flattenTree(treeResult.data).map(({ category, depth }) => ({
-          label: `${"– ".repeat(depth)}${category.title}`,
-          options: [category.title, ...category.products.map((product) => product.title)],
-        }))
-      : [];
-  const industryOptions =
-    industriesResult.status === "ready" ? industriesResult.data.map((industry) => industry.title) : [];
+  const [prepared, setPrepared] = useState<"saved" | "whatsapp" | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const interestGroups = useInterestOptions();
 
   const updateField = (field: keyof ContactForm, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -100,13 +99,10 @@ function Contact() {
   const validate = () => {
     const nextErrors: Partial<Record<keyof ContactForm, string>> = {};
 
-    if (!form.name.trim()) nextErrors.name = "Please enter your name.";
-    if (!form.company.trim()) nextErrors.company = "Please enter your company name.";
+    if (form.name.trim().length < 2) nextErrors.name = "Please enter your name.";
 
     const phoneDigits = form.phone.replace(/\D/g, "");
-    if (!form.phone.trim()) {
-      nextErrors.phone = "Please enter your phone number.";
-    } else if (phoneDigits.length < 7 || phoneDigits.length > 15) {
+    if (form.phone.trim() && (phoneDigits.length < 7 || phoneDigits.length > 15)) {
       nextErrors.phone = "Enter a valid phone number.";
     }
 
@@ -114,10 +110,6 @@ function Contact() {
       nextErrors.email = "Please enter your email address.";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       nextErrors.email = "Enter a valid email address.";
-    }
-
-    if (!form.requirement) {
-      nextErrors.requirement = "Please select a requirement.";
     }
 
     if (!form.message.trim()) {
@@ -131,38 +123,42 @@ function Contact() {
   };
 
   /*
-   * No backend: the enquiry opens in WhatsApp or the visitor's email app,
-   * filled in and ready to send.
+   * Saves the enquiry (POST /api/enquiries): it lands in the admin inbox and,
+   * once email is switched on, is emailed to the business.
    */
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setPrepared(null);
+    setFormError("");
 
     if (!validate()) return;
 
-    const submitter = (event.nativeEvent as SubmitEvent)
-      .submitter as HTMLButtonElement | null;
-    const channel = submitter?.value === "email" ? "email" : "whatsapp";
+    setSubmitting(true);
+    const result = await submitEnquiry({ ...form, turnstileToken });
+    setSubmitting(false);
 
-    const message = enquiryMessage({
-      name: form.name.trim(),
-      company: form.company.trim(),
-      phone: form.phone.trim(),
-      email: form.email.trim(),
-      requirement: form.requirement,
-      message: form.message.trim(),
-    });
-
-    setPrepared(channel);
-
-    if (channel === "whatsapp") {
-      window.open(whatsappLink(message), "_blank", "noopener,noreferrer");
-    } else {
-      window.location.href = emailLink(
-        `Website Enquiry: ${form.requirement}, ${form.company.trim()}`,
-        message,
-      );
+    if (result.ok) {
+      setPrepared("saved");
+      setForm(initialForm);
+      return;
     }
+
+    setFormError(result.message);
+    if (result.fields) setErrors(result.fields as Partial<Record<keyof ContactForm, string>>);
+  };
+
+  /* Secondary option: send the same details on WhatsApp instead. */
+  const handleWhatsApp = () => {
+    if (form.name.trim().length < 2 || form.message.trim().length < 2) {
+      setErrors({
+        ...(form.name.trim().length < 2 ? { name: "Please enter your name." } : {}),
+        ...(form.message.trim().length < 2 ? { message: "Please describe your requirement." } : {}),
+      });
+      return;
+    }
+
+    window.open(whatsappLink(enquiryMessage(form)), "_blank", "noopener,noreferrer");
+    setPrepared("whatsapp");
   };
 
   const reveal = {
@@ -359,11 +355,22 @@ function Contact() {
                 What do you need?
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                Provide your contact details and requirement so the enquiry can
-                be prepared for our business email.
+                Share your details and requirement. Your enquiry goes straight
+                to our team, and we'll get back to you.
               </p>
 
               <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
+                {/* Honeypot: hidden from people, tempting to bots */}
+                <input
+                  type="text"
+                  name="website"
+                  value={form.website}
+                  onChange={(event) => updateField("website", event.target.value)}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  className="absolute left-[-9999px] h-0 w-0 opacity-0"
+                  aria-hidden="true"
+                />
                 <div className="grid gap-5 sm:grid-cols-2">
                   <Field
                     label="Full name"
@@ -403,50 +410,35 @@ function Contact() {
 
                 <div>
                   <label
-                    htmlFor="requirement"
+                    htmlFor="interest"
                     className="mb-2 block text-sm font-semibold text-slate-800"
                   >
-                    Requirement type <span className="text-orange-600">*</span>
+                    Product or industry
                   </label>
                   <select
-                    id="requirement"
-                    name="requirement"
-                    value={form.requirement}
+                    id="interest"
+                    name="interest"
+                    value={form.interest}
                     onChange={(event) =>
-                      updateField("requirement", event.target.value)
+                      updateField("interest", event.target.value)
                     }
-                    aria-invalid={Boolean(errors.requirement)}
-                    aria-describedby={errors.requirement ? "requirement-error" : undefined}
+                    aria-invalid={Boolean(errors.interest)}
                     className="min-h-12 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
-                    required
+                    
                   >
-                    <option value="">Select a requirement</option>
+                    <option value="">Not sure / general enquiry</option>
                     {interestGroups.map((group) => (
                       <optgroup key={group.label} label={group.label}>
-                        {group.options.map((title, index) => (
-                          <option key={`${group.label}-${title}`} value={title}>
-                            {index === 0 ? `All ${title}` : title}
+                        {group.options.map((option) => (
+                          <option key={`${group.label}-${option.value}`} value={option.value}>
+                            {option.label}
                           </option>
                         ))}
                       </optgroup>
                     ))}
-                    {industryOptions.length > 0 && (
-                      <optgroup label="Industry">
-                        {industryOptions.map((title) => (
-                          <option key={`industry-${title}`} value={`Industry: ${title}`}>
-                            {title}
-                          </option>
-                        ))}
-                      </optgroup>
-                    )}
                     <option value="Bulk or project supply">Bulk or project supply</option>
-                    <option value="Other requirement">Other requirement</option>
                   </select>
-                  {errors.requirement && (
-                    <p id="requirement-error" role="alert" className="mt-2 text-sm text-red-600">
-                      {errors.requirement}
-                    </p>
-                  )}
+
                 </div>
 
                 <div>
@@ -485,38 +477,45 @@ function Contact() {
                   </div>
                 </div>
 
+                <Turnstile onToken={setTurnstileToken} />
+
+                {formError && (
+                  <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                    {formError}
+                  </p>
+                )}
+
                 <div className="grid gap-3 sm:grid-cols-2">
                   <button
                     type="submit"
-                    value="whatsapp"
-                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-orange-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
+                    disabled={submitting}
+                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-orange-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    <MessageCircle size={17} aria-hidden="true" />
-                    Send on WhatsApp
+                    {submitting ? "Sending…" : "Send enquiry"}
+                    <Send size={17} aria-hidden="true" />
                   </button>
 
                   <button
-                    type="submit"
-                    value="email"
+                    type="button"
+                    onClick={handleWhatsApp}
                     className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-slate-300 px-6 py-3 text-sm font-bold text-slate-800 transition hover:border-orange-500 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
                   >
-                    Send by email
-                    <Send size={17} aria-hidden="true" />
+                    <MessageCircle size={17} aria-hidden="true" />
+                    Send on WhatsApp instead
                   </button>
                 </div>
 
                 {prepared && (
                   <p role="status" className="flex items-start gap-2 text-sm leading-6 text-emerald-700">
                     <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
-                    {prepared === "whatsapp"
-                      ? "WhatsApp should open with your enquiry filled in. Press send there to reach us."
-                      : "Your email app should open with your enquiry filled in. Press send there to reach us."}
+                    {prepared === "saved"
+                      ? "Thank you, we've received your enquiry and will get back to you shortly."
+                      : "WhatsApp should open with your enquiry filled in. Press send there to reach us."}
                   </p>
                 )}
 
                 <p className="text-xs leading-5 text-slate-500">
-                  Nothing opened? Call {DISPLAY_PHONE} or email us directly at{" "}
-                  {BUSINESS_EMAIL}.
+                  Prefer to talk? Call {DISPLAY_PHONE} or email {BUSINESS_EMAIL}.
                 </p>
               </form>
             </motion.div>
@@ -541,14 +540,18 @@ function Contact() {
                     <MapPin size={22} />
                   </div>
                   <div>
-                    <h3 className="font-semibold">Chennai, Tamil Nadu</h3>
-                    <p className="mt-2 text-sm leading-7 text-slate-300">
-                      No. 232/178, Linghi Chetty Street,
-                      <br />
-                      Chennai – 600 001,
-                      <br />
-                      Tamil Nadu, India.
-                    </p>
+                    <div className="space-y-4">
+                    {site.locations.map((location) => (
+                      <div key={location.id}>
+                        <h3 className="font-semibold">
+                          {location.locality}, {location.region}
+                        </h3>
+                        <p className="mt-2 text-sm leading-7 text-slate-300">
+                          {formatAddress(location)}
+                        </p>
+                      </div>
+                    ))}
+                    </div>
                   </div>
                 </div>
 
@@ -565,7 +568,7 @@ function Contact() {
                       {DISPLAY_PHONE}
                     </a>
                     <a
-                      href="tel:+914445122249"
+                      href={company.landlineHref}
                       className="mt-1 block text-sm text-slate-300 transition hover:text-white"
                     >
                       {OFFICE_PHONE}
@@ -594,49 +597,34 @@ function Contact() {
                   </div>
                   <div>
                     <h3 className="font-semibold">Business hours</h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-300">
-                      Please contact us to confirm current business hours and
-                      availability before visiting.
-                    </p>
+                    {site.locations.some((location) => location.openingHours.length > 0) ? (
+                      <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-300">
+                        {site.locations.flatMap((location) =>
+                          location.openingHours.map((hours) => (
+                            <li key={`${location.id}-${hours}`}>
+                              {site.locations.length > 1 ? `${location.name}: ` : ""}
+                              {hours}
+                            </li>
+                          )),
+                        )}
+                      </ul>
+                    ) : (
+                      <p className="mt-2 text-sm leading-6 text-slate-300">
+                        Please contact us to confirm current business hours and
+                        availability before visiting.
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <p className="mt-7 border-t border-white/10 pt-5 text-xs leading-6 text-slate-400">
-                  GSTIN: 33GFZPM1541E1Z9
+                  GSTIN: {company.gstin}
                 </p>
               </div>
 
-              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                <div className="p-5">
-                  <h3 className="font-bold">Find our office</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    View the office location on Google Maps before planning
-                    your visit.
-                  </p>
-                  <a
-                    href="https://www.google.com/maps/search/?api=1&query=No.+232%2F178%2C+Linghi+Chetty+Street%2C+Chennai+600001%2C+Tamil+Nadu%2C+India"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-orange-600 hover:text-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
-                  >
-                    Open in Google Maps
-                    <ArrowRight size={16} />
-                  </a>
-                </div>
-                <div className="border-t border-slate-200 bg-slate-100 p-4">
-                  <div className="flex min-h-28 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white px-5 text-center">
-                    <div>
-                      <MapPin className="mx-auto text-orange-500" size={25} />
-                      <p className="mt-2 text-sm font-semibold text-slate-800">
-                        Linghi Chetty Street, Chennai
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Google Maps opens separately
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {site.locations.map((location) => (
+                <LocationMap key={location.id} location={location} />
+              ))}
             </motion.aside>
           </div>
         </section>
