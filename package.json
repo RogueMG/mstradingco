@@ -14,7 +14,8 @@
     "db:seed:local": "npm run db:seed:build && wrangler d1 execute mstradingco-db --local --file db/seed.sql",
     "db:migrate:remote": "wrangler d1 migrations apply mstradingco-db --remote",
     "db:seed:remote": "npm run db:seed:build && wrangler d1 execute mstradingco-db --remote --file db/seed.sql",
-    "dev:cf": "npm run build && npm run db:migrate:local && npm run db:seed:local && wrangler pages dev --port 8790"
+    "dev:cf": "npm run build && npm run db:migrate:local && npm run db:seed:local && wrangler pages dev --port 8790",
+    "test:access": "node scripts/test-access.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
