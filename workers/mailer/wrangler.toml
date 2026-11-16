@@ -1,0 +1,19 @@
+# Sends enquiry notification emails for the mstradingco Pages project.
+# Pages Functions can't use the send_email binding, so the enquiry Function
+# calls this Worker through a service binding (see ../../wrangler.toml).
+#
+# Deploy (after Email Routing is enabled on the custom domain and the inbox is
+# verified as a destination address):
+#   npx wrangler deploy --config workers/mailer/wrangler.toml
+name = "mstradingco-mailer"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+
+# No public URL: only the Pages project can call it, via the service binding.
+workers_dev = false
+preview_urls = false
+
+[[send_email]]
+name = "EMAIL"
+# Optional: lock the Worker to the one verified inbox.
+# destination_address = "you@example.com"
