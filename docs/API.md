@@ -27,7 +27,7 @@ For the editor-facing guide see [ADMIN.md](ADMIN.md). For search-engine setup se
 
 | Name | Type | Binding / variable | Notes |
 | --- | --- | --- | --- |
-| `mstradingco` | Pages project | n/a | Production branch `main`; other branches get preview deployments |
+| `mstradingco` | Pages project | n/a | https://mstradingco.pages.dev. Production branch `main`; other branches get preview deployments (`https://<branch>.mstradingco.pages.dev`) |
 | `mstradingco-db` | D1 database | `DB` | `database_id` goes in `wrangler.toml` after creating it |
 | `mstradingco-media` | R2 bucket | `MEDIA` | Uploaded images, keys `uploads/<uuid>.webp` and `uploads/<uuid>-thumb.webp` |
 | `mstradingco-mailer` | Worker | `MAILER` (service binding) | Optional; commented out in `wrangler.toml` until email is switched on |
