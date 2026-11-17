@@ -23,8 +23,8 @@ MAIL_FROM = ""
 [[d1_databases]]
 binding = "DB"
 database_name = "mstradingco-db"
-# Filled in after `npx wrangler d1 create mstradingco-db`. Local dev works without it.
-database_id = "00000000-0000-0000-0000-000000000000"
+# From `npx wrangler d1 create mstradingco-db` (region APAC). Not a secret.
+database_id = "6132c972-c2a4-47ce-ba56-126e13bbc0b5"
 migrations_dir = "migrations"
 
 [[r2_buckets]]
