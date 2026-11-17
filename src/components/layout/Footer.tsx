@@ -1,6 +1,7 @@
 import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
 import { Link } from "react-router";
 
+import { company, site } from "../../data/company";
 import { useTree } from "../../lib/content/hooks";
 import { publicAsset } from "../../lib/publicAsset";
 
@@ -100,7 +101,7 @@ function Footer() {
 
             <div className="mt-5 space-y-5">
               <a
-                href="tel:+918939575200"
+                href={company.phoneHref}
                 className="flex gap-3 text-sm text-blue-100/60 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4511e]"
               >
                 <Phone
@@ -111,14 +112,14 @@ function Footer() {
 
                 <span>
                   <span className="block font-semibold text-white">
-                    +91 89395 75200
+                    {company.phone}
                   </span>
-                  <span className="mt-1 block">044 4512 2249</span>
+                  {company.landline && <span className="mt-1 block">{company.landline}</span>}
                 </span>
               </a>
 
               <a
-                href="mailto:mstrading52@yahoo.com"
+                href={`mailto:${company.email}`}
                 className="flex gap-3 text-sm text-blue-100/60 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4511e]"
               >
                 <Mail
@@ -127,7 +128,7 @@ function Footer() {
                   aria-hidden="true"
                 />
 
-                <span className="break-all">mstrading52@yahoo.com</span>
+                <span className="break-all">{company.email}</span>
               </a>
 
               <div className="flex gap-3 text-sm leading-6 text-blue-100/60">
@@ -137,14 +138,17 @@ function Footer() {
                   aria-hidden="true"
                 />
 
-                <span>
-                  No. 232/178,
-                  <br />
-                  Linghi Chetty Street,
-                  <br />
-                  Chennai – 600 001,
-                  <br />
-                  Tamil Nadu
+                <span className="space-y-3">
+                  {site.locations.map((location) => (
+                    <span key={location.id} className="block">
+                      {location.streetAddress},
+                      <br />
+                      {location.locality}
+                      {location.postalCode ? ` – ${location.postalCode}` : ""},
+                      <br />
+                      {location.region}
+                    </span>
+                  ))}
                 </span>
               </div>
             </div>
@@ -189,7 +193,7 @@ function Footer() {
             </div>
 
             <p>
-              GSTIN: 33GFZPM1541E1Z9
+              GSTIN: {company.gstin}
             </p>
           </div>
         </div>

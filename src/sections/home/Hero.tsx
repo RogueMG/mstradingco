@@ -9,6 +9,7 @@ import {
 import { motion, useReducedMotion } from "motion/react";
 import { Link } from "react-router";
 
+import { company } from "../../data/company";
 import { publicAsset } from "../../lib/publicAsset";
 
 function Hero() {
@@ -70,7 +71,7 @@ function Hero() {
             className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/55"
           >
             <MapPin size={13} className="text-[#f4511e]" />
-            Chennai, Tamil Nadu
+            {company.cityLine}
           </motion.div>
 
           <motion.div
@@ -155,7 +156,7 @@ function Hero() {
               </Link>
 
               <a
-                href="tel:+918939575200"
+                href={company.phoneHref}
                 className="group inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-7 py-4 text-sm font-semibold backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-white/30 hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10">

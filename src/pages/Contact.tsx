@@ -289,7 +289,7 @@ function Contact() {
 
       <div className="flex items-center gap-2">
         <MapPin size={16} className="text-[#f4511e]" />
-        Chennai, Tamil Nadu
+        {company.cityLine}
       </div>
     </div>
   </motion.div>

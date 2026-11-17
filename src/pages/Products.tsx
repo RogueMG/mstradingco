@@ -15,6 +15,7 @@ import { useEnquiry } from "../hooks/useEnquiry";
 import { useNode, useTree } from "../lib/content/hooks";
 import { categoryMatches } from "../lib/content/tree";
 import type { CategoryNode, TreeCategory } from "../lib/content/types";
+import { company } from "../data/company";
 import { publicAsset } from "../lib/publicAsset";
 import { usePageMeta } from "../lib/usePageMeta";
 
@@ -261,7 +262,7 @@ function Products({ path }: { path: string }) {
       <div className="hidden h-4 w-px bg-white/15 sm:block" />
 
       <p className="text-xs font-semibold text-white/65">
-        Chennai, Tamil Nadu
+        {company.cityLine}
       </p>
     </div>
   </div>

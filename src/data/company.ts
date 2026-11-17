@@ -46,6 +46,11 @@ export const company = {
   whatsappNumber: site.whatsappNumber,
   gstin: site.gstin,
   address: primaryLocation ? formatAddress(primaryLocation) : "",
+  /** e.g. "Chennai, Tamil Nadu" */
+  cityLine: primaryLocation
+    ? [primaryLocation.locality, primaryLocation.region].filter(Boolean).join(", ")
+    : "",
+  whatsappHref: `https://wa.me/${site.whatsappNumber}`,
 };
 
 /** WhatsApp click-to-chat link with a pre-filled message. */

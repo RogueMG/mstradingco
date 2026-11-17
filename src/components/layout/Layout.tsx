@@ -5,6 +5,7 @@ import Footer from "./Footer";
 import Navbar from "./Navbar";
 import ScrollManager from "./ScrollManager";
 import EnquiryProvider from "../common/EnquiryProvider";
+import WhatsAppButton from "../common/WhatsAppButton";
 import PageLoading from "../ui/PageLoading";
 
 function Layout() {
@@ -20,6 +21,7 @@ function Layout() {
       </main>
 
       <Footer />
+      <WhatsAppButton />
     </EnquiryProvider>
   );
 }

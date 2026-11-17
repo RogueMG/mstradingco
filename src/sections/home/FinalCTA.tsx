@@ -2,6 +2,8 @@ import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight, MessageCircle, Phone } from "lucide-react";
 import { Link } from "react-router";
 
+import { company } from "../../data/company";
+
 function FinalCTA() {
   const shouldReduceMotion = useReducedMotion();
 
@@ -69,7 +71,7 @@ function FinalCTA() {
             </Link>
 
             <a
-              href="tel:+918939575200"
+              href={company.phoneHref}
               className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-7 py-4 text-sm font-bold text-white transition duration-300 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:w-auto"
             >
               <Phone size={17} aria-hidden="true" />
@@ -77,7 +79,7 @@ function FinalCTA() {
             </a>
 
             <a
-              href="https://wa.me/918939575200"
+              href={company.whatsappHref}
               target="_blank"
               rel="noreferrer"
               className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-7 py-4 text-sm font-bold text-white transition duration-300 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:w-auto"

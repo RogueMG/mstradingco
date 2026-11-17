@@ -9,6 +9,7 @@ import {
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { Link } from "react-router";
 
+import { company } from "../../data/company";
 import { publicAsset } from "../../lib/publicAsset";
 
 const MotionLink = motion.create(Link);
@@ -127,8 +128,8 @@ function Navbar() {
           {/* Desktop CTA */}
           <div className="hidden items-center gap-3 md:flex">
             <a
-              href="tel:+918939575200"
-              aria-label="Call MS Trading Co."
+              href={company.phoneHref}
+              aria-label={`Call ${company.name}`}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-[#063b73] transition-all duration-300 hover:border-[#063b73] hover:bg-[#063b73] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4511e]"
             >
               <Phone size={16} />
@@ -234,7 +235,7 @@ function Navbar() {
 
               <div className="mt-2 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
                 <a
-                  href="tel:+918939575200"
+                  href={company.phoneHref}
                   onClick={closeMenu}
                   className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 py-3 text-sm font-semibold text-[#063b73]"
                 >
@@ -243,7 +244,7 @@ function Navbar() {
                 </a>
 
                 <a
-                  href="https://wa.me/918939575200"
+                  href={company.whatsappHref}
                   target="_blank"
                   rel="noreferrer"
                   onClick={closeMenu}
