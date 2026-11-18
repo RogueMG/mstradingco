@@ -15,7 +15,7 @@ ACCESS_TEAM_DOMAIN = "https://floral-recipe-5149.cloudflareaccess.com"
 ACCESS_AUD = "74aeede5620e9d46d767d3198483c8bf2d9195ee81e56a380153c5e906fcce68"
 # Turnstile site key (public). The secret goes in with:
 #   npx wrangler pages secret put TURNSTILE_SECRET
-TURNSTILE_SITE_KEY = ""
+TURNSTILE_SITE_KEY = "0x4AAAAAAGHjc-tmGD5ymKXd"
 # Optional canonical origin once a custom domain is live, e.g. "https://www.example.com".
 # Empty = use the origin of each request.
 SITE_URL = ""
