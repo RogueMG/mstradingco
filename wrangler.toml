@@ -9,8 +9,10 @@ compatibility_date = "2026-11-01"
 # Cloudflare Access (Zero Trust) for /admin and /api/admin/*. Not secret.
 # Team domain looks like "https://<team>.cloudflareaccess.com"; the audience
 # (AUD) tag is on the Access application's Overview page.
-ACCESS_TEAM_DOMAIN = ""
-ACCESS_AUD = ""
+# Currently the Access app created by Pages → Settings → Preview access ("Restrict previews"),
+# which protects every preview URL (*.mstradingco.pages.dev). Not secret.
+ACCESS_TEAM_DOMAIN = "https://floral-recipe-5149.cloudflareaccess.com"
+ACCESS_AUD = "74aeede5620e9d46d767d3198483c8bf2d9195ee81e56a380153c5e906fcce68"
 # Turnstile site key (public). The secret goes in with:
 #   npx wrangler pages secret put TURNSTILE_SECRET
 TURNSTILE_SITE_KEY = ""
