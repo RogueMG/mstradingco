@@ -121,6 +121,8 @@ Every enquiry sent from the website's forms lands here.
 - **New** shows unread enquiries. Opening one marks it as **read**.
 - Use **Archive** to clear handled enquiries, or **Mark as new** to flag one again.
 - **Reply by email** opens your email app with the customer's address filled in.
+- **Delete** removes the enquiry for good, after you confirm. It can't be undone; use **Archive**
+  if you might want it later.
 - "Email notification" shows whether the enquiry was also emailed to you. Until email notifications
   are switched on (the site owner does this once the custom domain is set up), it says "not switched
   on yet". Enquiries are still saved here either way.

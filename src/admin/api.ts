@@ -89,6 +89,7 @@ export const adminApi = {
   enquiries: (status: EnquiryStatus | "all") =>
     request<{ enquiries: AdminEnquiry[]; counts: Record<string, number> }>("GET", `enquiries?status=${status}`),
   setEnquiryStatus: (id: number, status: EnquiryStatus) => request<void>("PATCH", `enquiries/${id}`, { status }),
+  deleteEnquiry: (id: number) => request<void>("DELETE", `enquiries/${id}`),
 
   settings: () => request<Settings>("GET", "settings"),
   saveSettings: (settings: Settings) => request<Settings>("PUT", "settings", settings),

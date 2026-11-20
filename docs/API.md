@@ -172,7 +172,7 @@ empty, everything is refused (fail closed). Responses are `no-store`.
 | `DELETE uploads/<key>` | Removes an upload if nothing references it |
 | `GET/POST brands` · `PUT/DELETE brands/:id` · `POST brands/reorder` | Brands |
 | `GET/POST industries` · `PUT/DELETE industries/:id` · `POST industries/reorder` | Industries |
-| `GET enquiries?status=new\|read\|archived\|all` · `PATCH enquiries/:id` | Inbox list (latest 200) and `{ status }` |
+| `GET enquiries?status=new\|read\|archived\|all` · `PATCH enquiries/:id` · `DELETE enquiries/:id` | Inbox list (latest 200), `{ status }`, permanent delete |
 | `GET settings` · `PUT settings` | `{ site, private }` |
 
 Validation errors return `400` with `{ error, details: { field: message } }`; slug clashes return `409`.

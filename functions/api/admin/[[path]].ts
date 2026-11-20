@@ -21,6 +21,7 @@ import {
   createBrand,
   createIndustry,
   deleteBrand,
+  deleteEnquiry,
   deleteIndustry,
   discardUpload,
   getSettings,
@@ -76,6 +77,7 @@ const routes: [string, string, Handler][] = [
 
   ["GET", "enquiries", async ({ env, request }) => json(await listEnquiries(env, new URL(request.url).searchParams.get("status")))],
   ["PATCH", "enquiries/:id", async ({ env, request, params }) => (await setEnquiryStatus(env, parseId(params[0]), await readJson(request)), ok())],
+  ["DELETE", "enquiries/:id", async ({ env, params }) => (await deleteEnquiry(env, parseId(params[0])), ok())],
 
   ["GET", "settings", async ({ env }) => json(await getSettings(env))],
   ["PUT", "settings", async ({ env, request }) => json(await saveSettings(env, await readJson(request)))],

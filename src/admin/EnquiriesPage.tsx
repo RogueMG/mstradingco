@@ -1,4 +1,4 @@
-import { Archive, Inbox, Loader2, Mail, MailOpen, Phone } from "lucide-react";
+import { Archive, Inbox, Loader2, Mail, MailOpen, Phone, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import type { AdminEnquiry, EnquiryStatus } from "../../shared/admin";
@@ -17,7 +17,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
 }
 
-/** Enquiries inbox: list by status, open one to read it, mark it read or archived. */
+/** Enquiries inbox: list by status, open one to read it, mark it read or archived, or delete it. */
 function EnquiriesPage() {
   const toast = useToast();
   const [tab, setTab] = useState<EnquiryStatus | "all">("new");
@@ -51,6 +51,18 @@ function EnquiriesPage() {
       await adminApi.setEnquiryStatus(enquiry.id, status);
       toast.success(status === "archived" ? "Enquiry archived." : status === "read" ? "Marked as read." : "Marked as new.");
       setCurrent({ ...enquiry, status });
+      await reload();
+    } catch (err) {
+      toast.error(errorMessage(err));
+    }
+  };
+
+  const remove = async (enquiry: AdminEnquiry) => {
+    if (!window.confirm(`Delete this enquiry from ${enquiry.name}? This can't be undone.`)) return;
+    try {
+      await adminApi.deleteEnquiry(enquiry.id);
+      toast.success("Enquiry deleted.");
+      setCurrent(null);
       await reload();
     } catch (err) {
       toast.error(errorMessage(err));
@@ -199,6 +211,9 @@ function EnquiriesPage() {
                   <a className={buttonClass.primary} href={`mailto:${current.email}?subject=${encodeURIComponent("Re: your enquiry")}`}>
                     <Mail size={15} /> Reply by email
                   </a>
+                  <button type="button" className={`${buttonClass.danger} sm:ml-auto`} onClick={() => void remove(current)}>
+                    <Trash2 size={15} /> Delete
+                  </button>
                 </div>
               </article>
             ) : (

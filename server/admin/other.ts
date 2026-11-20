@@ -287,6 +287,12 @@ export async function setEnquiryStatus(env: Env, id: number, body: unknown): Pro
   if (!result.meta.changes) throw new HttpError(404, "Enquiry not found.");
 }
 
+/** Permanently deletes one enquiry. */
+export async function deleteEnquiry(env: Env, id: number): Promise<void> {
+  const result = await env.DB.prepare("DELETE FROM enquiries WHERE id = ?1").bind(id).run();
+  if (!result.meta.changes) throw new HttpError(404, "Enquiry not found.");
+}
+
 // ---------------------------------------------------------------- settings
 
 export async function getSettings(env: Env): Promise<{ site: SiteSettings; private: PrivateSettings }> {
