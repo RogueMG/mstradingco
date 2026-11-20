@@ -6,7 +6,9 @@ its own admin panel.
 - **Site:** Vite, React, TypeScript and Tailwind CSS, served by **Cloudflare Pages**.
 - **API, SEO, enquiries:** Cloudflare **Pages Functions** (`functions/`).
 - **Content:** Cloudflare **D1** (SQLite); uploaded images in **R2**.
-- **Admin:** `/admin`, protected by **Cloudflare Access** (email one-time codes).
+- **Admin:** `/admin`, protected by **Cloudflare Access** (email one-time codes). Until the custom
+  domain is live, editors use https://develop.mstradingco.pages.dev/admin; the production
+  `mstradingco.pages.dev/admin` is deliberately locked.
 
 ## Documentation
 
@@ -65,5 +67,5 @@ admin's sign-in is bypassed by `DEV_BYPASS_ACCESS` in `.dev.vars`; this never ap
 
 See [docs/API.md → Deploying](docs/API.md#deploying). In short: create the D1 database and R2 bucket
 with Wrangler, apply migrations and the seed, connect the GitHub repository in Cloudflare Pages
-(production branch `main`, build `npm run build`, output `dist`), then set up Cloudflare Access for
-`/admin` and Turnstile for the forms.
+(production branch `main`, build `npm run build`, output `dist`), then turn on Cloudflare Access for
+the previews ("Restrict previews") and Turnstile for the forms. Live at https://mstradingco.pages.dev.

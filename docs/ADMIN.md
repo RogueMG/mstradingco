@@ -6,13 +6,18 @@ technical knowledge.
 
 ## Signing in
 
-1. Go to **your-site-address/admin** (for example `https://mstradingco.pages.dev/admin`).
+1. Go to **https://develop.mstradingco.pages.dev/admin**. (Once the business has its own web
+   address, the admin moves to `https://<that-address>/admin`; the site owner will tell you.)
 2. Cloudflare asks for your email address. Enter the email the site owner added for you.
 3. Cloudflare emails you a **one-time code**. Type it in. There is no password to remember.
 4. You're in. The admin stays signed in for a while; after that it asks for a new code.
 
-If you see "Sign-in required" or "Forbidden", ask the site owner to add your email to the allowed
-list. Changes you save appear on the public site within about a minute.
+`https://mstradingco.pages.dev/admin` (without `develop.`) is deliberately locked and always shows
+"Forbidden"; use the address above. Both addresses use the same content, so what you save there is
+what the public site shows.
+
+If you see "Sign-in required" or "Forbidden" on the right address, ask the site owner to add your
+email to the allowed list. Changes you save appear on the public site within about a minute.
 
 The top bar has five sections: **Catalogue**, **Brands**, **Industries**, **Enquiries** and
 **Settings**. "View site" opens the public website in a new tab.

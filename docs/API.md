@@ -27,7 +27,7 @@ For the editor-facing guide see [ADMIN.md](ADMIN.md). For search-engine setup se
 
 | Name | Type | Binding / variable | Notes |
 | --- | --- | --- | --- |
-| `mstradingco` | Pages project | n/a | https://mstradingco.pages.dev. Production branch `main`; other branches get preview deployments (`https://<branch>.mstradingco.pages.dev`) |
+| `mstradingco` | Pages project | n/a | https://mstradingco.pages.dev. Production branch `main`; other branches get preview deployments (`https://<branch>.mstradingco.pages.dev`), which are all behind Cloudflare Access |
 | `mstradingco-db` | D1 database | `DB` | `database_id` goes in `wrangler.toml` after creating it |
 | `mstradingco-media` | R2 bucket | `MEDIA` | Uploaded images, keys `uploads/<uuid>.webp` and `uploads/<uuid>-thumb.webp` |
 | `mstradingco-mailer` | Worker | `MAILER` (service binding) | Optional; commented out in `wrangler.toml` until email is switched on |
@@ -43,7 +43,9 @@ Variables (`[vars]` in `wrangler.toml`, not secret):
 | `SITE_URL` | Canonical origin once a custom domain is live (e.g. `https://www.example.com`); empty = each request's origin |
 | `MAIL_FROM` | Sender address for enquiry emails, on the domain that has Email Routing |
 
-Secrets (set with `npx wrangler pages secret put <NAME> --project-name mstradingco`, never committed):
+Secrets (never committed). Add them in the dashboard: Pages project → Settings → Variables and
+Secrets, type *Secret*, for **both Production and Preview**. (`npx wrangler pages secret put` only
+sets the production value.)
 
 | Secret | Meaning |
 | --- | --- |
@@ -209,37 +211,52 @@ The site owner does the sign-ins and dashboard steps; commands run from the repo
    `npm run build`, build output directory `dist`, root directory `/`. Use Node 22 or newer for the
    build. Bindings and variables come from `wrangler.toml`. Pushes to other branches (e.g. `develop`)
    create preview deployments.
-5. **Protect the admin with Cloudflare Access** (Zero Trust; choose the Free plan and confirm it shows
-   $0 before accepting): Access → Applications → Add → Self-hosted. Add the hostnames
-   `mstradingco.pages.dev` and `*.mstradingco.pages.dev` (previews) with the paths `admin` and
-   `api/admin`. Add a policy *Allow*, Include → Emails → the editors' addresses. One-time PIN login
-   works without further setup. Copy the team domain and the application's **AUD** tag into
-   `ACCESS_TEAM_DOMAIN` / `ACCESS_AUD` in `wrangler.toml`, then commit and deploy.
-6. **Turnstile** (dashboard → Turnstile → Add widget): add the site's hostnames, put the **site key**
-   in `TURNSTILE_SITE_KEY` (`wrangler.toml`), and add the secret yourself:
-   `npx wrangler pages secret put TURNSTILE_SECRET --project-name mstradingco`.
-7. **Verify on the preview URL:** every page renders from D1; `/admin` and `/api/admin/me` return 403
-   when signed out and work when signed in; an upload works; an enquiry is stored; `/sitemap.xml` and
-   `/robots.txt` are valid; an unknown URL returns 404; JSON-LD passes Google's Rich Results Test; no
-   console errors; no horizontal scrolling at 1440 px and 390 px.
-8. **Go live:** merge `develop` into `main`. Once production is confirmed, disable the old GitHub Pages
-   workflow (`.github/workflows/main.yml`).
+5. **Protect the previews (and so the editors' admin) with Cloudflare Access** (Zero Trust; choose
+   the Free plan and confirm it shows $0 before accepting). A self-hosted Access app can't be created
+   for `pages.dev` directly (its Domain list only offers zones the account owns), so use the Pages
+   route: Pages project → Settings → General → **Preview access → Restrict previews**. This creates
+   the Access app "mstradingco - Cloudflare Pages" for `*.mstradingco.pages.dev`. Leave its path
+   empty (whole site): Access only adds the `Cf-Access-Jwt-Assertion` header on paths it protects,
+   and both `/admin` and `/api/admin` need it. Add a policy *Allow*, Include → Emails → the editors'
+   addresses; one-time PIN login works without further setup. Copy the team domain and the app's
+   **AUD** tag into `ACCESS_TEAM_DOMAIN` / `ACCESS_AUD` in `wrangler.toml`, then commit and deploy.
+
+   Result: every preview needs sign-in, and editors use **https://develop.mstradingco.pages.dev/admin**
+   (it writes to the same D1 as production). Production `mstradingco.pages.dev` has no Access app, so
+   its `/admin` and `/api/admin/*` refuse everything (403, fail closed) until the custom domain gets
+   its own Access app (see [Custom domain](#custom-domain-and-enquiry-emails)).
+6. **Turnstile** (dashboard → Turnstile → Add widget, Managed): hostname `mstradingco.pages.dev`
+   (covers its subdomains). Put the **site key** in `TURNSTILE_SITE_KEY` (`wrangler.toml`) and add
+   `TURNSTILE_SECRET` in the dashboard for Production and Preview (see Secrets above).
+7. **Verify on the preview URL** (signed in, since previews are behind Access): every page renders
+   from D1; signed-out requests to `/admin` and `/api/admin/*` are sent to the Access login; an upload
+   works; an enquiry is stored; `/sitemap.xml` and `/robots.txt` are valid; an unknown URL returns
+   404; no console errors; no horizontal scrolling at 1440 px and 390 px. The Rich Results Test
+   can't reach previews; run it on production.
+8. **Go live:** fast-forward `main` to `develop` and push; Cloudflare builds and deploys production.
+   Keep `develop` equal to `main` afterwards (it serves the editors' admin).
 
 ## Custom domain and enquiry emails
 
 1. Add the domain to Cloudflare (Free plan) and change the nameservers at your registrar to the two
    Cloudflare gives you. Wait until the domain shows **Active**.
 2. Pages project → Custom domains → add the domain (and `www` if you want both).
-3. Add the new hostname(s) to the Access application, and set `SITE_URL` in `wrangler.toml`.
-4. Domain → Email → **Email Routing** → enable it. Under *Destination addresses*, add the enquiry inbox
+3. **Admin on the domain:** Zero Trust → Access → Applications → Add → Self-hosted, hostname(s) of
+   the domain with the paths `admin` and `api/admin` (zone domains allow several rows), the same
+   *Allow* policy as the preview app. This app has its own AUD tag, so the config must accept both
+   AUDs (the preview app's and this one); `ACCESS_AUD` holds a single value today, so that needs a
+   small code change first.
+4. Add the domain to the Turnstile widget's hostnames, set `SITE_URL` in `wrangler.toml`, and
+   redirect `mstradingco.pages.dev` to the domain.
+5. Domain → Email → **Email Routing** → enable it. Under *Destination addresses*, add the enquiry inbox
    and click the verification link Cloudflare emails to it.
-5. Deploy the mailer Worker:
+6. Deploy the mailer Worker:
    ```bash
    npx wrangler deploy --config workers/mailer/wrangler.toml
    ```
-6. In `wrangler.toml`, set `MAIL_FROM` to an address on the domain (e.g. `website@example.com`) and
+7. In `wrangler.toml`, set `MAIL_FROM` to an address on the domain (e.g. `website@example.com`) and
    uncomment the `[[services]]` block for `MAILER`. Commit and deploy.
-7. Send a test enquiry. In Admin → Enquiries it should show "Email notification: sent". A `failed`
+8. Send a test enquiry. In Admin → Enquiries it should show "Email notification: sent". A `failed`
    status usually means the inbox isn't a verified destination address or `MAIL_FROM` isn't on the
    domain.
 
