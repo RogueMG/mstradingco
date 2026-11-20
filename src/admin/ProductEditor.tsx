@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { AdminBrand, AdminImage, AdminProduct } from "../../shared/admin";
 import { slugify } from "../../shared/slug";
 import { ApiError, adminApi } from "./api";
+import { DraftUploadsProvider, useDraftUploads } from "./draftUploads";
 import { Checkbox, Field, Section } from "./fields";
 import ImageList from "./ImageList";
 import { SpecsEditor, StringList, TagsInput } from "./ListEditors";
@@ -110,6 +111,7 @@ function ProductForm({ product, categoryId, index, onSaved, onDeleted }: Product
   const [brands, setBrands] = useState<AdminBrand[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const drafts = useDraftUploads();
 
   useEffect(() => {
     adminApi
@@ -137,14 +139,17 @@ function ProductForm({ product, categoryId, index, onSaved, onDeleted }: Product
       specifications: form.specifications.filter((row) => row.label.trim() || row.value.trim()),
     };
 
+    drafts.setSaving(true);
     try {
       const saved = product ? await adminApi.updateProduct(product.id, input) : await adminApi.createProduct(input);
+      drafts.saved(saved.images);
       toast.success(isNew ? "Product created." : "Product saved.");
       onSaved(saved);
     } catch (err) {
       if (err instanceof ApiError) setErrors(err.fields);
       toast.error(errorMessage(err));
     } finally {
+      drafts.setSaving(false);
       setSaving(false);
     }
   };
@@ -231,7 +236,9 @@ function ProductForm({ product, categoryId, index, onSaved, onDeleted }: Product
           <textarea value={form.summary} onChange={(event) => set("summary", event.target.value)} rows={3} className={inputClass} />
         </Field>
 
-        <ImageList images={form.images} onChange={(images) => set("images", images)} defaultAlt={form.title} error={errors.images} />
+        <DraftUploadsProvider value={drafts}>
+          <ImageList images={form.images} onChange={(images) => set("images", images)} defaultAlt={form.title} error={errors.images} />
+        </DraftUploadsProvider>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <Checkbox label="Published" hint="Unpublished products are hidden from the site." checked={form.published} onChange={(value) => set("published", value)} />

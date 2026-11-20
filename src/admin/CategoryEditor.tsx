@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { AdminCategory, AdminImage } from "../../shared/admin";
 import { slugify } from "../../shared/slug";
 import { ApiError, adminApi } from "./api";
+import { DraftUploadsProvider, useDraftUploads } from "./draftUploads";
 import { Checkbox, Field, Section } from "./fields";
 import ImageInput from "./ImageInput";
 import { buttonClass, inputClass } from "./styles";
@@ -32,6 +33,7 @@ function CategoryEditor({ category, parentId, index, onSaved, onDeleted }: Categ
   const [parent, setParent] = useState<number | null>(category ? category.parentId : parentId);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const drafts = useDraftUploads();
 
   const blocked = category ? selfAndDescendants(index, category.id) : new Set<number>();
   const parentOptions = flattenCategories(index).filter(({ category: option }) => !blocked.has(option.id));
@@ -45,14 +47,17 @@ function CategoryEditor({ category, parentId, index, onSaved, onDeleted }: Categ
 
     const input = { parentId: parent, title, slug, eyebrow, summary, image, showOnHome };
 
+    drafts.setSaving(true);
     try {
       const saved = category ? await adminApi.updateCategory(category.id, input) : await adminApi.createCategory(input);
+      drafts.saved([saved.image]);
       toast.success(isNew ? "Category created." : "Category saved.");
       onSaved(saved);
     } catch (err) {
       if (err instanceof ApiError) setErrors(err.fields);
       toast.error(errorMessage(err));
     } finally {
+      drafts.setSaving(false);
       setSaving(false);
     }
   };
@@ -128,7 +133,9 @@ function CategoryEditor({ category, parentId, index, onSaved, onDeleted }: Categ
           <textarea value={summary} onChange={(event) => setSummary(event.target.value)} rows={3} className={inputClass} />
         </Field>
 
-        <ImageInput label="Image" required value={image} onChange={setImage} error={errors.image} defaultAlt={`${title} products`} />
+        <DraftUploadsProvider value={drafts}>
+          <ImageInput label="Image" required value={image} onChange={setImage} error={errors.image} defaultAlt={`${title} products`} />
+        </DraftUploadsProvider>
 
         <Checkbox label="Show on the home page" hint="Top-level categories with this on appear in the home page grid." checked={showOnHome} onChange={setShowOnHome} />
       </Section>

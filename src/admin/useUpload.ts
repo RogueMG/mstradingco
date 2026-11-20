@@ -2,12 +2,14 @@ import { useState } from "react";
 
 import type { AdminImage } from "../../shared/admin";
 import { adminApi } from "./api";
+import { useDraftUploadsContext } from "./draftUploads";
 import { prepareImage } from "./images";
 import { errorMessage, useToast } from "./toast";
 
 /** Resizes, converts and uploads an image; returns it as a stored AdminImage. */
 export function useUpload() {
   const toast = useToast();
+  const drafts = useDraftUploadsContext();
   const [uploading, setUploading] = useState(false);
 
   const upload = async (file: File, alt: string): Promise<AdminImage | null> => {
@@ -22,6 +24,7 @@ export function useUpload() {
       form.append("height", String(prepared.height));
 
       const result = await adminApi.upload(form);
+      drafts?.track(result.key);
       return { key: result.key, url: null, alt, width: result.width, height: result.height };
     } catch (err) {
       toast.error(errorMessage(err));

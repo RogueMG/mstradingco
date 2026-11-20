@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { adminImageSrc, type AdminIndustry } from "../../shared/admin";
 import { slugify } from "../../shared/slug";
 import { ApiError, adminApi } from "./api";
+import { DraftUploadsProvider, useDraftUploads } from "./draftUploads";
 import { Checkbox, Field, Section } from "./fields";
 import ImageInput from "./ImageInput";
 import OrderedListPage from "./OrderedListPage";
@@ -23,19 +24,23 @@ function IndustryEditor({ industry, onSaved, onDeleted }: { industry: AdminIndus
   const [slugTouched, setSlugTouched] = useState(Boolean(industry));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const drafts = useDraftUploads();
 
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
     setSaving(true);
     setErrors({});
+    drafts.setSaving(true);
     try {
       const saved = industry ? await adminApi.updateIndustry(industry.id, form) : await adminApi.createIndustry(form);
+      drafts.saved([saved.image]);
       toast.success(industry ? "Industry saved." : "Industry added.");
       onSaved(saved.id);
     } catch (err) {
       if (err instanceof ApiError) setErrors(err.fields);
       toast.error(errorMessage(err));
     } finally {
+      drafts.setSaving(false);
       setSaving(false);
     }
   };
@@ -81,7 +86,9 @@ function IndustryEditor({ industry, onSaved, onDeleted }: { industry: AdminIndus
         <Field label="Summary" error={errors.summary}>
           <textarea value={form.summary} rows={3} onChange={(event) => setForm((current) => ({ ...current, summary: event.target.value }))} className={inputClass} />
         </Field>
-        <ImageInput label="Image" required value={form.image} onChange={(image) => setForm((current) => ({ ...current, image }))} error={errors.image} defaultAlt={form.title} />
+        <DraftUploadsProvider value={drafts}>
+          <ImageInput label="Image" required value={form.image} onChange={(image) => setForm((current) => ({ ...current, image }))} error={errors.image} defaultAlt={form.title} />
+        </DraftUploadsProvider>
         <Checkbox label="Show on the home page" checked={form.showOnHome} onChange={(showOnHome) => setForm((current) => ({ ...current, showOnHome }))} />
       </Section>
       <div className="flex justify-between gap-3">

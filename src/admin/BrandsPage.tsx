@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { adminImageSrc, type AdminBrand } from "../../shared/admin";
 import { slugify } from "../../shared/slug";
 import { ApiError, adminApi } from "./api";
+import { DraftUploadsProvider, useDraftUploads } from "./draftUploads";
 import { Checkbox, Field, Section } from "./fields";
 import ImageInput from "./ImageInput";
 import OrderedListPage from "./OrderedListPage";
@@ -24,19 +25,23 @@ function BrandEditor({ brand, onSaved, onDeleted }: { brand: AdminBrand | null; 
   const [slugTouched, setSlugTouched] = useState(Boolean(brand));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const drafts = useDraftUploads();
 
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
     setSaving(true);
     setErrors({});
+    drafts.setSaving(true);
     try {
       const saved = brand ? await adminApi.updateBrand(brand.id, form) : await adminApi.createBrand(form);
+      drafts.saved([saved.logo]);
       toast.success(brand ? "Brand saved." : "Brand added.");
       onSaved(saved.id);
     } catch (err) {
       if (err instanceof ApiError) setErrors(err.fields);
       toast.error(errorMessage(err));
     } finally {
+      drafts.setSaving(false);
       setSaving(false);
     }
   };
@@ -82,7 +87,9 @@ function BrandEditor({ brand, onSaved, onDeleted }: { brand: AdminBrand | null; 
         <Field label="Description" error={errors.description} hint="One line shown on the Brands page.">
           <textarea value={form.description} rows={2} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} className={inputClass} />
         </Field>
-        <ImageInput label="Logo (optional)" value={form.logo} onChange={(logo) => setForm((current) => ({ ...current, logo }))} error={errors.logo} defaultAlt={`${form.name} logo`} />
+        <DraftUploadsProvider value={drafts}>
+          <ImageInput label="Logo (optional)" value={form.logo} onChange={(logo) => setForm((current) => ({ ...current, logo }))} error={errors.logo} defaultAlt={`${form.name} logo`} />
+        </DraftUploadsProvider>
         <div className="grid gap-3 sm:grid-cols-2">
           <Checkbox label="Confirmed" hint='Off shows the brand as "confirmation pending".' checked={form.confirmed} onChange={(confirmed) => setForm((current) => ({ ...current, confirmed }))} />
           <Checkbox label="In-house range" hint="The company's own range." checked={form.inHouse} onChange={(inHouse) => setForm((current) => ({ ...current, inHouse }))} />

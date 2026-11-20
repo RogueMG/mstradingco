@@ -73,7 +73,6 @@ export const adminApi = {
   reorderProducts: (categoryId: number, ids: number[]) => request<void>("POST", "products/reorder", { categoryId, ids }),
 
   upload: (form: FormData) => request<UploadResult>("POST", "uploads", form),
-  discardUpload: (key: string) => request<void>("DELETE", `uploads/${key}`),
 
   brands: () => request<{ brands: AdminBrand[] }>("GET", "brands"),
   createBrand: (input: BrandInput) => request<AdminBrand>("POST", "brands", input),

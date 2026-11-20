@@ -183,8 +183,11 @@ Images are resized and converted to WebP **in the browser** (1600 px plus a 400 
 upload; the Function only checks the type, size and WebP signature. No image processing runs on the
 server.
 
-Known gap: an image uploaded in the editor but never saved (the editor was closed without saving)
-stays in R2. `DELETE /api/admin/uploads/<key>` exists for this, but the editor doesn't call it yet.
+Uploads that are never saved are cleaned up by the admin (`src/admin/draftUploads.ts`): each editor
+tracks the images uploaded while it is open and calls `DELETE /api/admin/uploads/<key>` for them
+when it is left, when the tab is reloaded or closed (`pagehide`, `keepalive`), and, after a save, for
+uploads that were replaced or removed before saving. The server only deletes an upload that no row
+references, so saved images are never affected.
 
 ## Deploying
 
